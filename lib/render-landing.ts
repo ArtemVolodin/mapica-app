@@ -70,7 +70,6 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
   const playStore = playStoreUrl(env);
   const cover = preview.cover_image_url;
   const slugJs = JSON.stringify(preview.slug);
-  const routePathJs = JSON.stringify(`/route/${preview.slug}`);
 
   const playStoreLink = playStore
     ? `<a class="btn btn-secondary" href="${escapeHtml(playStore)}">Google Play</a>`
@@ -132,22 +131,24 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
   <script>
     (function () {
       var slug = ${slugJs};
-      var routePath = ${routePathJs};
-      var pageUrl = ${JSON.stringify(pageUrl)};
 
-      function tryOpenApp() {
-        var deepLink = 'mapica://route/' + slug;
+      function tryOpenApp(path) {
+        var deepLink = 'mapica://' + path.replace(/^\//, '');
         var start = Date.now();
         window.location.href = deepLink;
         setTimeout(function () {
           if (Date.now() - start < 1600) {
-            window.location.href = pageUrl;
+            window.location.href = ${JSON.stringify(appStore)};
           }
         }, 1200);
       }
 
-      document.getElementById('open-app')?.addEventListener('click', tryOpenApp);
-      document.getElementById('adapt-trip')?.addEventListener('click', tryOpenApp);
+      document.getElementById('open-app')?.addEventListener('click', function () {
+        tryOpenApp('route/' + slug);
+      });
+      document.getElementById('adapt-trip')?.addEventListener('click', function () {
+        tryOpenApp('trip/create?adapt=' + encodeURIComponent(slug));
+      });
     })();
   </script>
 </body>
