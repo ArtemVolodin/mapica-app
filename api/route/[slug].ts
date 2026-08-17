@@ -1,33 +1,36 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { readEnv } from '../../lib/env';
 import { fetchRoutePreview } from '../../lib/fetch-preview';
 import { renderLanding, renderNotFound } from '../../lib/render-landing';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export const config = { runtime: 'edge' };
+
+export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
-    res.status(405).setHeader('Allow', 'GET, HEAD').end();
-    return;
+    return new Response('Method Not Allowed', {
+      status: 405,
+      headers: { Allow: 'GET, HEAD' },
+    });
   }
 
-  const slug = String(req.query.slug ?? '').trim();
+  const url = new URL(req.url);
+  const slug = decodeURIComponent(url.pathname.split('/').filter(Boolean).at(-1) ?? '').trim();
   if (!slug || slug.length > 120 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug)) {
-    res.status(400).send('Invalid slug');
-    return;
+    return new Response('Invalid slug', { status: 400 });
   }
 
   const env = readEnv();
   try {
     const preview = await fetchRoutePreview(slug, env);
     const html = preview ? renderLanding(preview, env) : renderNotFound(slug, env);
-    const status = preview ? 200 : 404;
-
-    res
-      .status(status)
-      .setHeader('Content-Type', 'text/html; charset=utf-8')
-      .setHeader('X-Robots-Tag', preview ? 'index, follow' : 'noindex')
-      .send(req.method === 'HEAD' ? '' : html);
+    return new Response(req.method === 'HEAD' ? null : html, {
+      status: preview ? 200 : 404,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-Robots-Tag': preview ? 'index, follow' : 'noindex',
+      },
+    });
   } catch (error) {
     console.error('route landing error', error);
-    res.status(502).send('Preview service unavailable');
+    return new Response('Preview service unavailable', { status: 502 });
   }
 }
