@@ -9,5 +9,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["api/**/*.ts", "lib/**/*.ts", "functions/**/*.ts"]
+  "include": ["lib/**/*.ts", "functions/**/*.ts"]
 }
