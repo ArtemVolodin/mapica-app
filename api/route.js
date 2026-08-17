@@ -1,5 +1,30 @@
 const DEFAULT_SUPABASE_URL = 'https://qsstbssltuzglvtrpkvh.supabase.co';
 
+const PARIS_PHOTO =
+  'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80';
+const ITALY_PHOTO =
+  'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1600&q=80';
+const TRAVEL_PHOTO =
+  'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80';
+
+function coverUrl(preview) {
+  const existing = preview.cover_image_url;
+  if (existing) return existing;
+  const d = String(preview.destination || preview.city || '').toLowerCase();
+  if (d.includes('paris')) return PARIS_PHOTO;
+  if (d.includes('nice') || d.includes('liguria') || d.includes('italy') || d.includes('cinque')) {
+    return ITALY_PHOTO;
+  }
+  return TRAVEL_PHOTO;
+}
+
+const HEAD_META = `
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+`;
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -41,7 +66,7 @@ function renderNotFound(slug) {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  ${HEAD_META}
   <title>${escapeHtml(title)} · Mapica</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <link rel="stylesheet" href="/styles/route.css" />
@@ -60,26 +85,24 @@ function renderNotFound(slug) {
 
 function renderLanding(preview) {
   const site = siteUrl();
-  const ogImage = preview.og?.image || preview.cover_image_url || `${site}/og-default.svg`;
-  const pageUrl = preview.public_url || `${site}/route/${encodeURIComponent(preview.slug)}`;
+  const cover = coverUrl(preview);
   const title = preview.title;
   const description = preview.short_description;
   const price = `€${Number(preview.price_eur).toFixed(0)}`;
+  const pageUrl = preview.public_url || `${site}/route/${encodeURIComponent(preview.slug)}`;
+  const ogImage = preview.og?.image || cover;
   const dest = escapeHtml(preview.destination);
   const days = preview.duration_days;
   const daysLabel = `${days} day${days === 1 ? '' : 's'}`;
-  const cover = preview.cover_image_url;
   const slugJs = JSON.stringify(preview.slug);
   const store = appStoreUrl();
-  const hero = cover
-    ? `<div class="hero" style="background-image:url('${escapeHtml(cover)}')"></div>`
-    : `<div class="hero hero-fallback">${dest}</div>`;
+  const hero = `<div class="hero"><img src="${escapeHtml(cover)}" alt="${dest}" /></div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  ${HEAD_META}
   <title>${escapeHtml(title)} · Mapica</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <meta property="og:title" content="${escapeHtml(preview.og?.title || title)}" />
@@ -112,12 +135,13 @@ function renderLanding(preview) {
       <li>${preview.walking_km} km</li>
       <li>~${preview.estimated_hours}h</li>
     </ul>
+    <p class="hint">Exact stops and local tips unlock in the app after purchase.</p>
+  </div>
+  <div class="dock">
     <div class="cta">
       <button type="button" class="btn btn-primary" id="open-app">Open in Mapica</button>
       <button type="button" class="btn btn-ghost" id="adapt-trip">Adapt with Mapica</button>
-      <a class="btn btn-text" href="${escapeHtml(store)}">App Store</a>
     </div>
-    <p class="hint">Exact stops and local tips unlock in the app after purchase.</p>
   </div>
   <script>
     (function () {

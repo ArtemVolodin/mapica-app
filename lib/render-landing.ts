@@ -1,5 +1,6 @@
 import type { SiteEnv } from './env';
 import type { RoutePreview } from './types';
+import { coverUrl } from './cover';
 
 function escapeHtml(value: string): string {
   return value
@@ -18,10 +19,12 @@ function appStoreUrl(env: SiteEnv): string {
   return env.APP_STORE_URL ?? 'https://apps.apple.com/app/mapica';
 }
 
-function playStoreUrl(env: SiteEnv): string | null {
-  const url = env.PLAY_STORE_URL?.trim();
-  return url || null;
-}
+const HEAD_META = `
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+`;
 
 export function renderNotFound(slug: string, env: SiteEnv = {}): string {
   const title = 'Route not found';
@@ -32,7 +35,7 @@ export function renderNotFound(slug: string, env: SiteEnv = {}): string {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  ${HEAD_META}
   <title>${escapeHtml(title)} · Mapica</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <meta property="og:title" content="${escapeHtml(title)}" />
@@ -55,41 +58,34 @@ export function renderNotFound(slug: string, env: SiteEnv = {}): string {
 
 export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string {
   const site = siteUrl(env);
-  const defaultOg = `${site}/og-default.svg`;
-  const ogImage = preview.og.image ?? preview.cover_image_url ?? defaultOg;
+  const cover = coverUrl(preview);
   const pageUrl = preview.public_url || `${site}/route/${encodeURIComponent(preview.slug)}`;
   const title = preview.title;
   const description = preview.short_description;
   const price = `€${preview.price_eur.toFixed(0)}`;
   const daysLabel = `${preview.duration_days} day${preview.duration_days === 1 ? '' : 's'}`;
   const appStore = appStoreUrl(env);
-  const playStore = playStoreUrl(env);
-  const cover = preview.cover_image_url;
+  const dest = escapeHtml(preview.destination);
   const slugJs = JSON.stringify(preview.slug);
-  const playStoreLink = playStore
-    ? `<a class="btn btn-text" href="${escapeHtml(playStore)}">Google Play</a>`
-    : '';
-  const hero = cover
-    ? `<div class="hero" style="background-image:url('${escapeHtml(cover)}')"></div>`
-    : `<div class="hero hero-fallback">${escapeHtml(preview.destination)}</div>`;
+  const hero = `<div class="hero"><img src="${escapeHtml(cover)}" alt="${dest}" /></div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  ${HEAD_META}
   <title>${escapeHtml(title)} · Mapica</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <meta property="og:title" content="${escapeHtml(preview.og.title)}" />
   <meta property="og:description" content="${escapeHtml(preview.og.description)}" />
-  <meta property="og:image" content="${escapeHtml(ogImage)}" />
+  <meta property="og:image" content="${escapeHtml(cover)}" />
   <meta property="og:url" content="${escapeHtml(pageUrl)}" />
   <meta property="og:type" content="${escapeHtml(preview.og.type)}" />
   <meta property="og:site_name" content="Mapica" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(preview.og.title)}" />
   <meta name="twitter:description" content="${escapeHtml(preview.og.description)}" />
-  <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
+  <meta name="twitter:image" content="${escapeHtml(cover)}" />
   <link rel="canonical" href="${escapeHtml(pageUrl)}" />
   <link rel="stylesheet" href="/styles/route.css" />
 </head>
@@ -97,7 +93,7 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
   <header class="top"><a class="logo" href="/">Mapica</a></header>
   ${hero}
   <div class="body">
-    <p class="kicker">Local route · ${escapeHtml(preview.destination)}</p>
+    <p class="kicker">Local route · ${dest}</p>
     <div class="title-row">
       <h1>${escapeHtml(title)}</h1>
       <p class="price"><span>from</span> ${escapeHtml(price)}</p>
@@ -110,18 +106,17 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
       <li>${preview.walking_km} km</li>
       <li>~${preview.estimated_hours}h</li>
     </ul>
+    <p class="hint">Exact stops and local tips unlock in the app after purchase.</p>
+  </div>
+  <div class="dock">
     <div class="cta">
       <button type="button" class="btn btn-primary" id="open-app">Open in Mapica</button>
       <button type="button" class="btn btn-ghost" id="adapt-trip">Adapt with Mapica</button>
-      <a class="btn btn-text" href="${escapeHtml(appStore)}">App Store</a>
-      ${playStoreLink}
     </div>
-    <p class="hint">Exact stops and local tips unlock in the app after purchase.</p>
   </div>
   <script>
     (function () {
       var slug = ${slugJs};
-
       function tryOpenApp(path) {
         var deepLink = 'mapica://' + path.replace(/^\//, '');
         var start = Date.now();
@@ -132,7 +127,6 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
           }
         }, 1200);
       }
-
       document.getElementById('open-app')?.addEventListener('click', function () {
         tryOpenApp('route/' + slug);
       });
