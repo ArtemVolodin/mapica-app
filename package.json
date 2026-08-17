@@ -1,0 +1,13 @@
+{
+  "name": "mapica-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Public landing pages for mapica.app/route/:slug",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vercel/node": "^5.1.8",
+    "typescript": "^5.8.2"
+  }
+}

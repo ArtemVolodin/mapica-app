@@ -1,0 +1,25 @@
+{
+  "rewrites": [
+    { "source": "/route/:slug", "destination": "/api/route/:slug" }
+  ],
+  "headers": [
+    {
+      "source": "/route/:slug",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=120, stale-while-revalidate=600"
+        }
+      ]
+    },
+    {
+      "source": "/og-default.svg",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, immutable"
+        }
+      ]
+    }
+  ]
+}

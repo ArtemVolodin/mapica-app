@@ -1,0 +1,8 @@
+name = "mapica-web"
+pages_build_output_dir = "public"
+compatibility_date = "2026-08-17"
+
+[vars]
+SITE_URL = "https://mapica.app"
+SUPABASE_URL = "https://qsstbssltuzglvtrpkvh.supabase.co"
+APP_STORE_URL = "https://apps.apple.com/app/mapica"

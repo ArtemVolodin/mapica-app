@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Mapica">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#efe8dd"/>
+      <stop offset="100%" stop-color="#e7eadd"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="96" y="300" fill="#20201e" font-family="Arial, Helvetica, sans-serif" font-size="84" font-weight="700">Mapica</text>
+  <text x="96" y="380" fill="#68735a" font-family="Arial, Helvetica, sans-serif" font-size="42">Local travel routes</text>
+  <circle cx="1040" cy="120" r="72" fill="#d9684a"/>
+</svg>
