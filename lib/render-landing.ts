@@ -42,15 +42,12 @@ export function renderNotFound(slug: string, env: SiteEnv = {}): string {
   <link rel="stylesheet" href="/styles/route.css" />
 </head>
 <body>
-  <main class="page">
-    <header class="brand">
-      <span class="logo">Mapica</span>
-    </header>
-    <section class="card empty">
-      <h1>${escapeHtml(title)}</h1>
-      <p>${escapeHtml(description)}</p>
-      <a class="btn btn-secondary" href="${escapeHtml(appStoreUrl(env))}">Get Mapica</a>
-    </section>
+  <header class="top"><a class="logo" href="/">Mapica</a></header>
+  <main class="empty">
+    <p class="kicker">Local route</p>
+    <h1>${escapeHtml(title)}</h1>
+    <p>${escapeHtml(description)}</p>
+    <a class="btn btn-primary" href="${escapeHtml(appStoreUrl(env))}">Get the app</a>
   </main>
 </body>
 </html>`;
@@ -64,20 +61,17 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
   const title = preview.title;
   const description = preview.short_description;
   const price = `€${preview.price_eur.toFixed(0)}`;
-  const metaLine = `${preview.duration_days} day${preview.duration_days === 1 ? '' : 's'} · ${escapeHtml(preview.destination)}`;
-  const statsLine = `${preview.place_count} places · ${preview.walking_km} km walk · ~${preview.estimated_hours}h`;
+  const daysLabel = `${preview.duration_days} day${preview.duration_days === 1 ? '' : 's'}`;
   const appStore = appStoreUrl(env);
   const playStore = playStoreUrl(env);
   const cover = preview.cover_image_url;
   const slugJs = JSON.stringify(preview.slug);
-
   const playStoreLink = playStore
-    ? `<a class="btn btn-secondary" href="${escapeHtml(playStore)}">Google Play</a>`
+    ? `<a class="btn btn-text" href="${escapeHtml(playStore)}">Google Play</a>`
     : '';
-
   const hero = cover
     ? `<div class="hero" style="background-image:url('${escapeHtml(cover)}')"></div>`
-    : `<div class="hero hero-fallback"><span>${escapeHtml(preview.destination)}</span></div>`;
+    : `<div class="hero hero-fallback">${escapeHtml(preview.destination)}</div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -100,34 +94,30 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
   <link rel="stylesheet" href="/styles/route.css" />
 </head>
 <body>
-  <main class="page">
-    <header class="brand">
-      <span class="logo">Mapica</span>
-      <span class="badge">Local route</span>
-    </header>
-
-    <article class="card">
-      ${hero}
-      <div class="content">
-        <p class="local">${escapeHtml(preview.local_display_name)}</p>
-        <h1>${escapeHtml(title)}</h1>
-        <p class="pitch">${escapeHtml(description)}</p>
-        <p class="meta">${metaLine}</p>
-        <p class="stats">${statsLine}</p>
-        <p class="price">${escapeHtml(price)}</p>
-
-        <div class="actions">
-          <button type="button" class="btn btn-primary" id="open-app">Open in Mapica</button>
-          <button type="button" class="btn btn-accent" id="adapt-trip">Adapt with Mapica</button>
-        </div>
-        <div class="store-links">
-          <a class="btn btn-secondary" href="${escapeHtml(appStore)}">App Store</a>
-          ${playStoreLink}
-        </div>
-        <p class="hint">Exact stops and local tips unlock inside the app after purchase.</p>
-      </div>
-    </article>
-  </main>
+  <header class="top"><a class="logo" href="/">Mapica</a></header>
+  ${hero}
+  <div class="body">
+    <p class="kicker">Local route · ${escapeHtml(preview.destination)}</p>
+    <div class="title-row">
+      <h1>${escapeHtml(title)}</h1>
+      <p class="price"><span>from</span> ${escapeHtml(price)}</p>
+    </div>
+    <p class="by">${escapeHtml(preview.local_display_name)}</p>
+    <p class="pitch">${escapeHtml(description)}</p>
+    <ul class="facts">
+      <li>${escapeHtml(daysLabel)}</li>
+      <li>${preview.place_count} places</li>
+      <li>${preview.walking_km} km</li>
+      <li>~${preview.estimated_hours}h</li>
+    </ul>
+    <div class="cta">
+      <button type="button" class="btn btn-primary" id="open-app">Open in Mapica</button>
+      <button type="button" class="btn btn-ghost" id="adapt-trip">Adapt with Mapica</button>
+      <a class="btn btn-text" href="${escapeHtml(appStore)}">App Store</a>
+      ${playStoreLink}
+    </div>
+    <p class="hint">Exact stops and local tips unlock in the app after purchase.</p>
+  </div>
   <script>
     (function () {
       var slug = ${slugJs};
