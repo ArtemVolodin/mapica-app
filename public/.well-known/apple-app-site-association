@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "P7HMLPQ252.com.mapica.mapica2",
+        "paths": ["/route/*"]
+      }
+    ]
+  }
+}
