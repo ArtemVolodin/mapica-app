@@ -54,11 +54,22 @@ body {
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.03em;
   color: var(--ink);
   text-decoration: none;
+}
+
+.logo img {
+  width: 28px;
+  height: 28px;
+  border-radius: 22.5%;
+  background: #fff;
+  box-shadow: 0 0 0 0.5px var(--line);
 }
 
 .hero {

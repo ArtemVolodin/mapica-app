@@ -23,6 +23,8 @@ const HEAD_META = `
   <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="icon" type="image/png" href="/images/app-icon-180.png" />
+  <link rel="apple-touch-icon" href="/images/app-icon.png" />
 `;
 
 function escapeHtml(value) {
@@ -72,7 +74,7 @@ function renderNotFound(slug) {
   <link rel="stylesheet" href="/styles/route.css" />
 </head>
 <body>
-  <header class="top"><a class="logo" href="/">Mapica</a></header>
+  <header class="top"><a class="logo" href="/"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a></header>
   <main class="empty">
     <p class="kicker">Local route</p>
     <h1>${escapeHtml(title)}</h1>
@@ -119,7 +121,7 @@ function renderLanding(preview) {
   <link rel="stylesheet" href="/styles/route.css" />
 </head>
 <body>
-  <header class="top"><a class="logo" href="/">Mapica</a></header>
+  <header class="top"><a class="logo" href="/"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a></header>
   ${hero}
   <div class="body">
     <p class="kicker">Local route · ${dest}</p>
@@ -140,7 +142,6 @@ function renderLanding(preview) {
   <div class="dock">
     <div class="cta">
       <button type="button" class="btn btn-primary" id="open-app">Open in Mapica</button>
-      <button type="button" class="btn btn-ghost" id="adapt-trip">Adapt with Mapica</button>
     </div>
   </div>
   <script>
@@ -158,9 +159,6 @@ function renderLanding(preview) {
       }
       document.getElementById('open-app')?.addEventListener('click', function () {
         tryOpenApp('route/' + slug);
-      });
-      document.getElementById('adapt-trip')?.addEventListener('click', function () {
-        tryOpenApp('trip/create?adapt=' + encodeURIComponent(slug));
       });
     })();
   </script>
