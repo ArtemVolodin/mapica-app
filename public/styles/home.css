@@ -466,6 +466,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   max-width: var(--max);
   margin: 0 auto;
@@ -474,6 +475,18 @@ h1 {
   font-size: 13px;
   border-top: 0.5px solid var(--line);
   padding-top: 22px;
+}
+
+.foot-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.foot-brand img {
+  width: 20px;
+  height: 20px;
+  border-radius: 22.5%;
 }
 
 @media (max-width: 860px) {
