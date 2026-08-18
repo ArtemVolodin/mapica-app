@@ -3,27 +3,168 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#faf8f3" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Mapica</title>
-  <meta name="description" content="Local travel routes, planned with Mapica." />
-  <meta property="og:title" content="Mapica" />
-  <meta property="og:description" content="Local travel routes, planned with Mapica." />
-  <meta property="og:image" content="/og-default.svg" />
+  <title>Mapica — A journey, made specially for you</title>
+  <meta name="description" content="Personal travel planned by a Mapica Local who actually lives there. Days, times, and places — ready in 24 hours. Also browse ready-made local routes." />
+  <meta property="og:title" content="Mapica — travel planned by a local" />
+  <meta property="og:description" content="A person who knows the place builds your trip. Personal itineraries in 24 hours, plus ready local routes." />
+  <meta property="og:image" content="https://mapica.app/images/og.jpg" />
   <meta property="og:url" content="https://mapica.app" />
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Mapica" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="/styles/route.css" />
+  <meta name="twitter:title" content="Mapica — travel planned by a local" />
+  <meta name="twitter:description" content="A person who knows the place builds your trip. Ready in 24 hours." />
+  <meta name="twitter:image" content="https://mapica.app/images/og.jpg" />
+  <link rel="canonical" href="https://mapica.app" />
+  <link rel="stylesheet" href="/styles/home.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "Mapica",
+    "operatingSystem": "iOS",
+    "applicationCategory": "TravelApplication",
+    "url": "https://mapica.app",
+    "description": "Personal travel planned by a local who lives there. Ready in 24 hours.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+  }
+  </script>
 </head>
 <body>
-  <header class="top">
-    <a class="logo" href="/">Mapica</a>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="nav" id="nav">
+    <a class="brand" href="/"><span class="mark">M</span> Mapica</a>
+    <a class="nav-cta" href="https://apps.apple.com/app/mapica">Get the app</a>
   </header>
-  <main class="empty">
-    <p class="kicker">Local routes</p>
-    <h1>Travel like a local</h1>
-    <p>Open a shared route link, or get the app to plan your next trip.</p>
-    <a class="btn btn-primary" href="https://apps.apple.com/app/mapica">Get the app</a>
+
+  <main id="main">
+    <section class="hero">
+      <img
+        src="/images/hero.jpg"
+        alt="Colorful hillside town on the Italian coast"
+        width="2000"
+        height="1333"
+        fetchpriority="high"
+      />
+      <div class="hero-copy">
+        <p class="kicker">Personal travel · by a person</p>
+        <h1>A journey, made specially for you.</h1>
+        <p class="lede">Tell Mapica where you’re going. A Local who lives there builds your days, walks, and tables — not a generic tour. Ready in 24 hours.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://apps.apple.com/app/mapica">Get the app</a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+      </div>
+    </section>
+
+    <p class="promise">
+      <span><i></i> Crafted by a person</span>
+      <span><i></i> Personal itinerary</span>
+      <span><i></i> Ready in 24 hours</span>
+    </p>
+
+    <section class="section" aria-labelledby="places-title">
+      <h2 id="places-title">Europe, as a local walks it</h2>
+      <p class="intro">Neighborhoods, timing, and the places you’d miss on a list. Mapica Locals plan trips they would give a friend.</p>
+      <div class="cities">
+        <a class="city" href="https://apps.apple.com/app/mapica">
+          <img src="/images/paris.jpg" alt="Paris along the Seine" width="1200" height="800" loading="lazy" />
+          <span>Paris</span>
+        </a>
+        <a class="city" href="https://apps.apple.com/app/mapica">
+          <img src="/images/lisbon.jpg" alt="Lisbon yellow tram" width="900" height="1200" loading="lazy" />
+          <span>Lisbon</span>
+        </a>
+        <a class="city" href="https://apps.apple.com/app/mapica">
+          <img src="/images/venice.jpg" alt="Venice canal" width="900" height="1200" loading="lazy" />
+          <span>Venice</span>
+        </a>
+        <a class="city" href="https://apps.apple.com/app/mapica">
+          <img src="/images/barcelona.jpg" alt="Barcelona street" width="900" height="1200" loading="lazy" />
+          <span>Barcelona</span>
+        </a>
+        <a class="city" href="https://apps.apple.com/app/mapica">
+          <img src="/images/rome.jpg" alt="Rome" width="900" height="1200" loading="lazy" />
+          <span>Rome</span>
+        </a>
+        <a class="city" href="https://apps.apple.com/app/mapica">
+          <img src="/images/med.jpg" alt="Coastal town on the Mediterranean" width="1200" height="800" loading="lazy" />
+          <span>The Mediterranean</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section" id="how" aria-labelledby="how-title">
+      <h2 id="how-title">Three steps. Then you’re packed.</h2>
+      <p class="intro">No quiz marathon. No 40-tab research spiral. A Local does the work you’d rather spend on the trip.</p>
+      <div class="steps">
+        <article class="step">
+          <h3>Tell us the trip</h3>
+          <p>City, dates, pace, who you travel with. The details a friend would ask before drawing a day.</p>
+        </article>
+        <article class="step">
+          <h3>A Local builds it</h3>
+          <p>Stops, walking times, restaurants, and why each place is there. Reviewed before it reaches you.</p>
+        </article>
+        <article class="step">
+          <h3>Open it on the map</h3>
+          <p>Your days live in Mapica: timeline, map, and tickets when a stop needs them.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="product-title">
+      <h2 id="product-title">Two ways to travel with Mapica</h2>
+      <p class="intro">A trip written for you — or a ready route a Local already loves.</p>
+      <div class="grid-2">
+        <article class="card">
+          <span class="tag">Personal</span>
+          <h3>Made for your dates</h3>
+          <p>A Mapica Local plans a private itinerary around your pace and people. You get a finished trip in the app within 24 hours.</p>
+        </article>
+        <article class="card">
+          <span class="tag">Ready routes</span>
+          <h3>Buy a local’s route</h3>
+          <p>Public routes you can open today: days, places, and the walking line. Share a link — or keep it as your own trip.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="locals" aria-labelledby="locals-title">
+      <div class="locals-copy">
+        <p class="kicker">For Locals</p>
+        <h2 id="locals-title">You know a place. That’s the whole product.</h2>
+        <p>Mapica Locals get paid to plan real trips — personal orders and public routes. Same app as travelers. No second account.</p>
+        <a class="btn btn-primary" href="https://apps.apple.com/app/mapica">Open Mapica as a Local</a>
+      </div>
+      <div class="locals-photo">
+        <img src="/images/cafe.jpg" alt="Evening cafe terrace" width="1400" height="900" loading="lazy" />
+      </div>
+    </section>
+
+    <section class="section final" aria-labelledby="cta-title">
+      <h2 id="cta-title">Where do you want to go?</h2>
+      <p class="intro">Download Mapica. Ask for a personal trip, or open a route a Local already published.</p>
+      <a class="btn btn-ink" href="https://apps.apple.com/app/mapica">Get the app on iPhone</a>
+    </section>
   </main>
+
+  <footer class="foot">
+    <span>Mapica</span>
+    <span>Personal travel, planned by a local</span>
+  </footer>
+  <script>
+    (function () {
+      var nav = document.getElementById('nav');
+      if (!nav) return;
+      var onScroll = function () {
+        nav.classList.toggle('is-stuck', window.scrollY > 8);
+      };
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+  </script>
 </body>
 </html>
