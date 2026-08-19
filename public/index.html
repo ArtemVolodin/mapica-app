@@ -72,28 +72,28 @@
       <p class="intro">Neighborhoods, timing, and the places you’d miss on a list. Mapica Locals plan trips they would give a friend.</p>
       <div class="cities">
         <button class="city" type="button" data-place="paris" aria-haspopup="dialog">
-          <img src="/images/paris.jpg" alt="Paris along the Seine" width="1200" height="800" loading="lazy" />
-          <span>Paris</span>
+          <span class="city-map" aria-hidden="true"></span>
+          <span class="city-label"><strong>Paris</strong><em>1 day · 6 places</em></span>
         </button>
         <button class="city" type="button" data-place="lisbon" aria-haspopup="dialog">
-          <img src="/images/lisbon.jpg" alt="Lisbon yellow tram" width="900" height="1200" loading="lazy" />
-          <span>Lisbon</span>
+          <span class="city-map" aria-hidden="true"></span>
+          <span class="city-label"><strong>Lisbon</strong><em>1 day · 6 places</em></span>
         </button>
         <button class="city" type="button" data-place="venice" aria-haspopup="dialog">
-          <img src="/images/venice.jpg" alt="Venice canal" width="900" height="1200" loading="lazy" />
-          <span>Venice</span>
+          <span class="city-map" aria-hidden="true"></span>
+          <span class="city-label"><strong>Venice</strong><em>1 day · 6 places</em></span>
         </button>
         <button class="city" type="button" data-place="barcelona" aria-haspopup="dialog">
-          <img src="/images/barcelona.jpg" alt="Barcelona street" width="900" height="1200" loading="lazy" />
-          <span>Barcelona</span>
+          <span class="city-map" aria-hidden="true"></span>
+          <span class="city-label"><strong>Barcelona</strong><em>1 day · 6 places</em></span>
         </button>
         <button class="city" type="button" data-place="rome" aria-haspopup="dialog">
-          <img src="/images/rome.jpg" alt="Rome" width="900" height="1200" loading="lazy" />
-          <span>Rome</span>
+          <span class="city-map" aria-hidden="true"></span>
+          <span class="city-label"><strong>Rome</strong><em>1 day · 6 places</em></span>
         </button>
         <button class="city" type="button" data-place="med" aria-haspopup="dialog">
-          <img src="/images/med.jpg" alt="Coastal town on the Mediterranean" width="1200" height="800" loading="lazy" />
-          <span>The Mediterranean</span>
+          <span class="city-map" aria-hidden="true"></span>
+          <span class="city-label"><strong>The Mediterranean</strong><em>1 day · walk + rail</em></span>
         </button>
       </div>
     </section>
@@ -374,42 +374,96 @@
       window.addEventListener("scroll", onScroll, { passive: true });
 
       function mapSvg(data) {
+        var seed = 0;
+        for (var i = 0; i < data.city.length; i++) seed += data.city.charCodeAt(i);
+        var blocks = "";
+        var parks = "";
+        var roads = "";
+        for (var b = 0; b < 14; b++) {
+          var bx = 8 + ((b * 53 + seed) % 292);
+          var by = 6 + ((b * 37 + seed * 2) % 168);
+          var bw = 22 + ((b * 11) % 38);
+          var bh = 16 + ((b * 7) % 28);
+          blocks +=
+            '<rect x="' +
+            bx +
+            '" y="' +
+            by +
+            '" width="' +
+            bw +
+            '" height="' +
+            bh +
+            '" rx="3"/>';
+        }
+        var parkPts = [
+          [48 + (seed % 40), 36, 34, 22],
+          [188, 28 + (seed % 24), 26, 26],
+          [132, 128, 40, 18],
+          [250, 150, 28, 16]
+        ];
+        for (var p = 0; p < parkPts.length; p++) {
+          parks +=
+            '<ellipse cx="' +
+            parkPts[p][0] +
+            '" cy="' +
+            parkPts[p][1] +
+            '" rx="' +
+            parkPts[p][2] +
+            '" ry="' +
+            parkPts[p][3] +
+            '"/>';
+        }
+        for (var r = 0; r < 5; r++) {
+          var hy = 28 + r * 36 + (seed % 9);
+          var vx = 36 + r * 58 + (seed % 13);
+          roads += '<path d="M -12 ' + hy + ' H 332"/>';
+          roads += '<path d="M ' + vx + ' -12 V 212"/>';
+        }
         var pins = data.pins
-          .map(function (p) {
+          .map(function (pin) {
             return (
               '<g transform="translate(' +
-              p.x +
+              pin.x +
               " " +
-              p.y +
+              pin.y +
               ')">' +
-              '<circle r="11" fill="#d9684a" stroke="#faf8f3" stroke-width="2.5"/>' +
-              '<text y="4" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, sans-serif">' +
-              p.n +
-              "</text></g>"
+              '<path d="M0 -16 C 7 -16 11 -10 11 -5 C 11 2 0 14 0 14 C 0 14 -11 2 -11 -5 C -11 -10 -7 -16 0 -16Z" fill="#d9684a"/>' +
+              '<circle cy="-7" r="4.2" fill="#fff"/>' +
+              "</g>"
             );
           })
           .join("");
         return (
-          '<svg viewBox="0 0 320 200" role="img">' +
-          '<rect width="320" height="200" fill="#efe8dd"/>' +
-          '<g fill="#e4ded4" opacity="0.9">' +
-          '<rect x="18" y="22" width="52" height="36" rx="6"/>' +
-          '<rect x="84" y="18" width="40" height="44" rx="6"/>' +
-          '<rect x="140" y="28" width="58" height="30" rx="6"/>' +
-          '<rect x="214" y="16" width="46" height="40" rx="6"/>' +
-          '<rect x="40" y="72" width="36" height="28" rx="6"/>' +
-          '<rect x="250" y="128" width="44" height="32" rx="6"/>' +
+          '<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" role="img">' +
+          '<rect width="320" height="200" fill="#f3eee4"/>' +
+          '<g fill="#e7e0d4">' +
+          blocks +
+          "</g>" +
+          '<g fill="#c9d7b8">' +
+          parks +
           "</g>" +
           '<path d="' +
           data.water +
-          '" fill="#c5d4e0" opacity="0.85"/>' +
+          '" fill="#bfd0df"/>' +
+          '<g fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round">' +
+          roads +
+          "</g>" +
+          '<g fill="none" stroke="#ebe4d8" stroke-width="0.6">' +
+          roads +
+          "</g>" +
           '<path d="' +
           data.path +
-          '" fill="none" stroke="#d9684a" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="5 6"/>' +
+          '" fill="none" stroke="#d9684a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>' +
           pins +
           "</svg>"
         );
       }
+
+      document.querySelectorAll(".city").forEach(function (btn) {
+        var slot = btn.querySelector(".city-map");
+        var data = places[btn.getAttribute("data-place")];
+        if (slot && data) slot.innerHTML = mapSvg(data);
+      });
 
       function closeSheet() {
         if (!root || root.hidden) return;
