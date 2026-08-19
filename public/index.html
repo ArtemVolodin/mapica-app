@@ -21,6 +21,7 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -206,32 +207,27 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     (function () {
       var APP = "https://apps.apple.com/app/mapica";
+      var PHOTO_POS = ["18% 30%", "72% 22%", "40% 68%", "82% 48%", "12% 78%", "58% 18%"];
+      var FOOD = { Lunch: 1, Dinner: 1, Café: 1 };
       var places = {
         paris: {
           city: "Paris",
           title: "Hidden Paris in one day",
           meta: "1 day · 6 places · walk",
           lede: "A Local’s day: stay, museum, lunch, island, river light.",
-          path: "M 42 148 C 88 132, 110 88, 148 96 S 210 70, 248 86 S 286 128, 292 58",
-          water: "M 0 170 C 80 150, 160 188, 320 160 L 320 200 L 0 200 Z",
-          pins: [
-            { x: 48, y: 146, n: 1 },
-            { x: 118, y: 102, n: 2 },
-            { x: 168, y: 94, n: 3 },
-            { x: 228, y: 78, n: 4 },
-            { x: 268, y: 108, n: 5 },
-            { x: 292, y: 58, n: 6 }
-          ],
+          photo: "/images/paris.jpg",
+          hops: ["Walk · 6 min", "Walk · 4 min", "Walk · 9 min", "Walk · 7 min", "Walk · 8 min"],
           stops: [
-            { t: "09:00", kind: "Hotel", name: "Le Marais stay", hint: "Drop bags" },
-            { t: "10:30", kind: "Museum", name: "Picasso Museum", hint: "60 min" },
-            { t: "12:30", kind: "Lunch", name: "Rue des Rosiers", hint: "Table a Local keeps" },
-            { t: "15:00", kind: "Island", name: "Île Saint-Louis", hint: "Walk, no list" },
-            { t: "17:30", kind: "Café", name: "Quai terrace", hint: "Seine light" },
-            { t: "19:30", kind: "Dinner", name: "Hidden courtyard", hint: "Book in the app" }
+            { t: "09:00", kind: "Hotel", name: "Le Marais stay", hint: "Drop bags", lat: 48.8575, lng: 2.362 },
+            { t: "10:30", kind: "Museum", name: "Picasso Museum", hint: "60 min", lat: 48.8596, lng: 2.3622 },
+            { t: "12:30", kind: "Lunch", name: "Rue des Rosiers", hint: "Table a Local keeps", lat: 48.857, lng: 2.3592 },
+            { t: "15:00", kind: "Island", name: "Île Saint-Louis", hint: "Walk, no list", lat: 48.8517, lng: 2.3569 },
+            { t: "17:30", kind: "Café", name: "Quai terrace", hint: "Seine light", lat: 48.8534, lng: 2.3578 },
+            { t: "19:30", kind: "Dinner", name: "Hidden courtyard", hint: "Book in the app", lat: 48.8608, lng: 2.3625 }
           ]
         },
         lisbon: {
@@ -239,23 +235,15 @@
           title: "Alfama at walking pace",
           meta: "1 day · 6 places · walk",
           lede: "Hills, a miradouro, the river — then a table.",
-          path: "M 36 40 C 70 70, 86 110, 120 128 S 170 160, 210 148 S 250 100, 286 168",
-          water: "M 0 150 C 120 170, 220 140, 320 180 L 320 200 L 0 200 Z",
-          pins: [
-            { x: 40, y: 44, n: 1 },
-            { x: 88, y: 108, n: 2 },
-            { x: 132, y: 132, n: 3 },
-            { x: 188, y: 154, n: 4 },
-            { x: 236, y: 118, n: 5 },
-            { x: 286, y: 168, n: 6 }
-          ],
+          photo: "/images/lisbon.jpg",
+          hops: ["Walk · 5 min", "Walk · 8 min", "Walk · 11 min", "Walk · 9 min", "Walk · 7 min"],
           stops: [
-            { t: "09:00", kind: "Hotel", name: "Alfama house", hint: "Stay on the hill" },
-            { t: "10:00", kind: "Viewpoint", name: "Portas do Sol", hint: "River first" },
-            { t: "11:30", kind: "Museum", name: "Azulejo Museum", hint: "45 min" },
-            { t: "13:30", kind: "Lunch", name: "Tasca, no English menu", hint: "Local pick" },
-            { t: "16:00", kind: "Walk", name: "Tram 28 stretch", hint: "Walk the line" },
-            { t: "19:00", kind: "Dinner", name: "Miradouro evening", hint: "Open in Mapica" }
+            { t: "09:00", kind: "Hotel", name: "Alfama house", hint: "Stay on the hill", lat: 38.7115, lng: -9.1298 },
+            { t: "10:00", kind: "Viewpoint", name: "Portas do Sol", hint: "River first", lat: 38.7136, lng: -9.1303 },
+            { t: "11:30", kind: "Museum", name: "Azulejo Museum", hint: "45 min", lat: 38.7248, lng: -9.1144 },
+            { t: "13:30", kind: "Lunch", name: "Tasca, no English menu", hint: "Local pick", lat: 38.7108, lng: -9.136 },
+            { t: "16:00", kind: "Walk", name: "Tram 28 stretch", hint: "Walk the line", lat: 38.7139, lng: -9.1335 },
+            { t: "19:00", kind: "Dinner", name: "Miradouro evening", hint: "Open in Mapica", lat: 38.7162, lng: -9.1308 }
           ]
         },
         venice: {
@@ -263,23 +251,15 @@
           title: "Cannaregio without the crush",
           meta: "1 day · 6 places · walk",
           lede: "Quiet sestieri, a campo, then the lagoon.",
-          path: "M 30 90 C 70 70, 100 120, 140 100 S 190 60, 230 88 S 270 140, 300 120",
-          water: "M 0 40 C 80 80, 40 160, 160 180 C 240 196, 300 120, 320 90 L 320 200 L 0 200 Z",
-          pins: [
-            { x: 34, y: 88, n: 1 },
-            { x: 92, y: 96, n: 2 },
-            { x: 148, y: 98, n: 3 },
-            { x: 202, y: 72, n: 4 },
-            { x: 248, y: 108, n: 5 },
-            { x: 298, y: 122, n: 6 }
-          ],
+          photo: "/images/venice.jpg",
+          hops: ["Walk · 8 min", "Walk · 6 min", "Walk · 5 min", "Walk · 10 min", "Walk · 7 min"],
           stops: [
-            { t: "09:00", kind: "Hotel", name: "Cannaregio inn", hint: "Away from San Marco" },
-            { t: "10:00", kind: "Church", name: "Madonna dell’Orto", hint: "Quiet hour" },
-            { t: "12:00", kind: "Lunch", name: "Cicchetti at the canal", hint: "Stand, then sit" },
-            { t: "14:30", kind: "Museum", name: "Jewish Ghetto", hint: "45 min" },
-            { t: "17:00", kind: "Walk", name: "Fondamente", hint: "No bridge crush" },
-            { t: "19:30", kind: "Dinner", name: "Campo evening", hint: "Book in the app" }
+            { t: "09:00", kind: "Hotel", name: "Cannaregio inn", hint: "Away from San Marco", lat: 45.4448, lng: 12.3265 },
+            { t: "10:00", kind: "Church", name: "Madonna dell’Orto", hint: "Quiet hour", lat: 45.4464, lng: 12.3325 },
+            { t: "12:00", kind: "Lunch", name: "Cicchetti at the canal", hint: "Stand, then sit", lat: 45.4425, lng: 12.326 },
+            { t: "14:30", kind: "Museum", name: "Jewish Ghetto", hint: "45 min", lat: 45.4453, lng: 12.3268 },
+            { t: "17:00", kind: "Walk", name: "Fondamente", hint: "No bridge crush", lat: 45.4438, lng: 12.3205 },
+            { t: "19:30", kind: "Dinner", name: "Campo evening", hint: "Book in the app", lat: 45.4412, lng: 12.328 }
           ]
         },
         barcelona: {
@@ -287,23 +267,15 @@
           title: "Gràcia to the sea",
           meta: "1 day · 6 places · walk",
           lede: "Courtyards, a market, then the grid meets the beach.",
-          path: "M 60 36 C 80 70, 70 110, 100 128 S 160 150, 200 136 S 250 110, 280 168",
-          water: "M 180 170 C 230 150, 280 180, 320 160 L 320 200 L 160 200 Z",
-          pins: [
-            { x: 62, y: 40, n: 1 },
-            { x: 78, y: 92, n: 2 },
-            { x: 112, y: 130, n: 3 },
-            { x: 178, y: 142, n: 4 },
-            { x: 236, y: 122, n: 5 },
-            { x: 278, y: 168, n: 6 }
-          ],
+          photo: "/images/barcelona.jpg",
+          hops: ["Walk · 4 min", "Walk · 22 min", "Walk · 14 min", "Walk · 18 min", "Walk · 12 min"],
           stops: [
-            { t: "09:00", kind: "Hotel", name: "Gràcia flat", hint: "Stay in the grid" },
-            { t: "10:00", kind: "Market", name: "Mercat de l’Abaceria", hint: "Coffee first" },
-            { t: "12:00", kind: "Museum", name: "Fundació Miró", hint: "60 min" },
-            { t: "14:30", kind: "Lunch", name: "Eixample courtyard", hint: "Shade" },
-            { t: "17:00", kind: "Walk", name: "Passeig down to the water", hint: "Slow" },
-            { t: "18:30", kind: "Beach", name: "Barceloneta light", hint: "Feet in, then app" }
+            { t: "09:00", kind: "Hotel", name: "Gràcia flat", hint: "Stay in the grid", lat: 41.4036, lng: 2.1574 },
+            { t: "10:00", kind: "Market", name: "Mercat de l’Abaceria", hint: "Coffee first", lat: 41.403, lng: 2.1588 },
+            { t: "12:00", kind: "Museum", name: "Fundació Miró", hint: "60 min", lat: 41.3685, lng: 2.1599 },
+            { t: "14:30", kind: "Lunch", name: "Eixample courtyard", hint: "Shade", lat: 41.391, lng: 2.1648 },
+            { t: "17:00", kind: "Walk", name: "Passeig down to the water", hint: "Slow", lat: 41.3851, lng: 2.176 },
+            { t: "18:30", kind: "Beach", name: "Barceloneta light", hint: "Feet in, then app", lat: 41.3784, lng: 2.1925 }
           ]
         },
         rome: {
@@ -311,23 +283,15 @@
           title: "Quiet Rome between the sites",
           meta: "1 day · 6 places · walk",
           lede: "Shade, a museum, lunch, then Trastevere after 18:00.",
-          path: "M 50 60 C 90 50, 120 90, 150 80 S 190 50, 220 88 S 250 140, 280 120",
-          water: "M 200 20 C 240 60, 220 140, 280 180 L 320 200 L 320 0 Z",
-          pins: [
-            { x: 52, y: 58, n: 1 },
-            { x: 108, y: 72, n: 2 },
-            { x: 156, y: 78, n: 3 },
-            { x: 204, y: 64, n: 4 },
-            { x: 238, y: 108, n: 5 },
-            { x: 278, y: 122, n: 6 }
-          ],
+          photo: "/images/rome.jpg",
+          hops: ["Walk · 9 min", "Walk · 8 min", "Walk · 18 min", "Walk · 16 min", "Walk · 4 min"],
           stops: [
-            { t: "09:00", kind: "Hotel", name: "Monti stay", hint: "Above the Forum" },
-            { t: "10:00", kind: "Museum", name: "Palazzo side rooms", hint: "Skip the queue" },
-            { t: "12:30", kind: "Lunch", name: "Trattoria with no view", hint: "Better food" },
-            { t: "15:00", kind: "Walk", name: "Aventine keyhole", hint: "Shade" },
-            { t: "17:30", kind: "Café", name: "Trastevere before the rush", hint: "Sit" },
-            { t: "19:30", kind: "Dinner", name: "After 18:00 table", hint: "Open in Mapica" }
+            { t: "09:00", kind: "Hotel", name: "Monti stay", hint: "Above the Forum", lat: 41.8954, lng: 12.4908 },
+            { t: "10:00", kind: "Museum", name: "Palazzo side rooms", hint: "Skip the queue", lat: 41.8986, lng: 12.4833 },
+            { t: "12:30", kind: "Lunch", name: "Trattoria with no view", hint: "Better food", lat: 41.8938, lng: 12.489 },
+            { t: "15:00", kind: "Walk", name: "Aventine keyhole", hint: "Shade", lat: 41.8836, lng: 12.4803 },
+            { t: "17:30", kind: "Café", name: "Trastevere before the rush", hint: "Sit", lat: 41.8894, lng: 12.47 },
+            { t: "19:30", kind: "Dinner", name: "After 18:00 table", hint: "Open in Mapica", lat: 41.8899, lng: 12.4685 }
           ]
         },
         med: {
@@ -335,23 +299,15 @@
           title: "Riviera villages in one day",
           meta: "1 day · 6 places · walk + rail",
           lede: "Menton light, a beach hour, Nice before dusk.",
-          path: "M 24 88 C 70 70, 110 110, 150 92 S 210 60, 250 84 S 280 120, 304 70",
-          water: "M 0 100 C 80 130, 160 90, 320 140 L 320 200 L 0 200 Z",
-          pins: [
-            { x: 28, y: 86, n: 1 },
-            { x: 86, y: 82, n: 2 },
-            { x: 148, y: 94, n: 3 },
-            { x: 208, y: 68, n: 4 },
-            { x: 256, y: 92, n: 5 },
-            { x: 304, y: 70, n: 6 }
-          ],
+          photo: "/images/med.jpg",
+          hops: ["Walk · 6 min", "Walk · 8 min", "Walk · 7 min", "Rail · 45 min", "Walk · 12 min"],
           stops: [
-            { t: "09:00", kind: "Hotel", name: "Menton old town", hint: "Pastel streets" },
-            { t: "10:30", kind: "Market", name: "Halles", hint: "Fruit, then walk" },
-            { t: "12:30", kind: "Lunch", name: "Port table", hint: "One course" },
-            { t: "14:30", kind: "Beach", name: "Plage des Sablettes", hint: "45 min" },
-            { t: "16:30", kind: "Rail", name: "Along the coast", hint: "Short hop" },
-            { t: "18:30", kind: "Walk", name: "Nice promenade", hint: "Open the full route" }
+            { t: "09:00", kind: "Hotel", name: "Menton old town", hint: "Pastel streets", lat: 43.7745, lng: 7.504 },
+            { t: "10:30", kind: "Market", name: "Halles", hint: "Fruit, then walk", lat: 43.7758, lng: 7.5055 },
+            { t: "12:30", kind: "Lunch", name: "Port table", hint: "One course", lat: 43.774, lng: 7.515 },
+            { t: "14:30", kind: "Beach", name: "Plage des Sablettes", hint: "45 min", lat: 43.7722, lng: 7.503 },
+            { t: "16:30", kind: "Rail", name: "Along the coast", hint: "Short hop", lat: 43.7747, lng: 7.4935 },
+            { t: "18:30", kind: "Walk", name: "Nice promenade", hint: "Open the full route", lat: 43.695, lng: 7.2656 }
           ]
         }
       };
@@ -365,6 +321,7 @@
       var itin = document.getElementById("sheet-itin");
       var app = document.getElementById("sheet-app");
       var lastFocus = null;
+      var liveMap = null;
 
       function onScroll() {
         if (!nav) return;
@@ -373,102 +330,99 @@
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
 
-      function mapSvg(data) {
-        var seed = 0;
-        for (var i = 0; i < data.city.length; i++) seed += data.city.charCodeAt(i);
-        var blocks = "";
-        var parks = "";
-        var roads = "";
-        for (var b = 0; b < 14; b++) {
-          var bx = 8 + ((b * 53 + seed) % 292);
-          var by = 6 + ((b * 37 + seed * 2) % 168);
-          var bw = 22 + ((b * 11) % 38);
-          var bh = 16 + ((b * 7) % 28);
-          blocks +=
-            '<rect x="' +
-            bx +
-            '" y="' +
-            by +
-            '" width="' +
-            bw +
-            '" height="' +
-            bh +
-            '" rx="3"/>';
-        }
-        var parkPts = [
-          [48 + (seed % 40), 36, 34, 22],
-          [188, 28 + (seed % 24), 26, 26],
-          [132, 128, 40, 18],
-          [250, 150, 28, 16]
-        ];
-        for (var p = 0; p < parkPts.length; p++) {
-          parks +=
-            '<ellipse cx="' +
-            parkPts[p][0] +
-            '" cy="' +
-            parkPts[p][1] +
-            '" rx="' +
-            parkPts[p][2] +
-            '" ry="' +
-            parkPts[p][3] +
-            '"/>';
-        }
-        for (var r = 0; r < 5; r++) {
-          var hy = 28 + r * 36 + (seed % 9);
-          var vx = 36 + r * 58 + (seed % 13);
-          roads += '<path d="M -12 ' + hy + ' H 332"/>';
-          roads += '<path d="M ' + vx + ' -12 V 212"/>';
-        }
-        var pins = data.pins
-          .map(function (pin) {
-            return (
-              '<g transform="translate(' +
-              pin.x +
-              " " +
-              pin.y +
-              ')">' +
-              '<path d="M0 -16 C 7 -16 11 -10 11 -5 C 11 2 0 14 0 14 C 0 14 -11 2 -11 -5 C -11 -10 -7 -16 0 -16Z" fill="#d9684a"/>' +
-              '<circle cy="-7" r="4.2" fill="#fff"/>' +
-              "</g>"
-            );
-          })
-          .join("");
-        return (
-          '<svg viewBox="0 0 320 200" preserveAspectRatio="xMidYMid slice" role="img">' +
-          '<rect width="320" height="200" fill="#f3eee4"/>' +
-          '<g fill="#e7e0d4">' +
-          blocks +
-          "</g>" +
-          '<g fill="#c9d7b8">' +
-          parks +
-          "</g>" +
-          '<path d="' +
-          data.water +
-          '" fill="#bfd0df"/>' +
-          '<g fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round">' +
-          roads +
-          "</g>" +
-          '<g fill="none" stroke="#ebe4d8" stroke-width="0.6">' +
-          roads +
-          "</g>" +
-          '<path d="' +
-          data.path +
-          '" fill="none" stroke="#d9684a" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>' +
-          pins +
-          "</svg>"
-        );
+      function pinIcon(n) {
+        return L.divIcon({
+          className: "m-pin",
+          html: "<span>" + n + "</span>",
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
+        });
       }
 
-      document.querySelectorAll(".city").forEach(function (btn) {
-        var slot = btn.querySelector(".city-map");
-        var data = places[btn.getAttribute("data-place")];
-        if (slot && data) slot.innerHTML = mapSvg(data);
-      });
+      function paintMap(data) {
+        if (!window.L || !mapEl) return;
+        if (liveMap) {
+          liveMap.remove();
+          liveMap = null;
+          mapEl.innerHTML = "";
+        }
+        var pts = data.stops.map(function (s) {
+          return [s.lat, s.lng];
+        });
+        liveMap = L.map(mapEl, {
+          zoomControl: false,
+          attributionControl: true,
+          scrollWheelZoom: false,
+          tapTolerance: 12
+        });
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+          attribution: "&copy; OSM &copy; CARTO",
+          maxZoom: 19
+        }).addTo(liveMap);
+        L.polyline(pts, {
+          color: "#d9684a",
+          weight: 4,
+          opacity: 0.92,
+          lineJoin: "round",
+          lineCap: "round"
+        }).addTo(liveMap);
+        pts.forEach(function (ll, i) {
+          L.marker(ll, { icon: pinIcon(i + 1), keyboard: false }).addTo(liveMap);
+        });
+        setTimeout(function () {
+          liveMap.invalidateSize();
+          liveMap.fitBounds(pts, { padding: [28, 28], maxZoom: 15 });
+        }, 40);
+      }
+
+      function foodPhoto(kind) {
+        return FOOD[kind] ? "/images/cafe.jpg" : null;
+      }
+
+      function renderItin(data) {
+        var html = "";
+        data.stops.forEach(function (s, i) {
+          var src = foodPhoto(s.kind) || data.photo;
+          var pos = PHOTO_POS[i];
+          html +=
+            '<li class="stop" style="--d:' +
+            i * 60 +
+            'ms"><div class="thumb"><img src="' +
+            src +
+            '" alt="" style="object-position:' +
+            pos +
+            '"><b>' +
+            (i + 1) +
+            "</b></div><div class=\"body\"><div class=\"meta\"><time>" +
+            s.t +
+            "</time><i>" +
+            s.kind +
+            "</i></div><p>" +
+            s.name +
+            "</p><span>" +
+            s.hint +
+            "</span></div></li>";
+          if (data.hops[i]) {
+            html +=
+              '<li class="hop" style="--d:' +
+              (i * 60 + 30) +
+              'ms"><i></i><em>' +
+              data.hops[i] +
+              "</em></li>";
+          }
+        });
+        itin.innerHTML = html;
+      }
 
       function closeSheet() {
         if (!root || root.hidden) return;
         root.hidden = true;
         document.body.style.overflow = "";
+        if (liveMap) {
+          liveMap.remove();
+          liveMap = null;
+          mapEl.innerHTML = "";
+        }
         if (lastFocus && lastFocus.focus) lastFocus.focus();
       }
 
@@ -479,27 +433,11 @@
         kicker.textContent = data.city + " · " + data.meta;
         title.textContent = data.title;
         lede.textContent = data.lede;
-        mapEl.innerHTML = mapSvg(data);
         app.href = APP;
-        itin.innerHTML = data.stops
-          .map(function (s, i) {
-            return (
-              "<li><span class=\"n\">" +
-              (i + 1) +
-              "</span><div><time>" +
-              s.t +
-              "</time> <em>" +
-              s.kind +
-              "</em><p>" +
-              s.name +
-              "</p><span>" +
-              s.hint +
-              "</span></div></li>"
-            );
-          })
-          .join("");
+        renderItin(data);
         root.hidden = false;
         document.body.style.overflow = "hidden";
+        paintMap(data);
         var closeBtn = root.querySelector(".sheet-close");
         if (closeBtn) closeBtn.focus();
       }

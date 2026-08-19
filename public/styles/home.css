@@ -391,7 +391,7 @@ h1 {
   position: absolute;
   top: 14px;
   right: 14px;
-  z-index: 2;
+  z-index: 800;
   width: 32px;
   height: 32px;
   border: 0;
@@ -407,17 +407,44 @@ h1 {
 
 .sheet-map {
   margin: 12px 16px 0;
-  height: 196px;
+  height: 248px;
   overflow: hidden;
   border-radius: 18px;
-  background: #f3eee4;
+  background: #e8e2d6;
   border: 0.5px solid var(--line);
 }
 
-.sheet-map svg {
+.sheet-map .leaflet-container {
   width: 100%;
   height: 100%;
-  display: block;
+  font-family: inherit;
+  background: #e8e2d6;
+}
+
+.sheet-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(250, 248, 243, 0.82);
+  color: var(--muted);
+}
+
+.m-pin {
+  background: none !important;
+  border: 0 !important;
+}
+
+.m-pin span {
+  display: flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(32, 32, 30, 0.22);
 }
 
 .sheet-kicker {
@@ -438,7 +465,7 @@ h1 {
 }
 
 .sheet-lede {
-  margin: 0 20px 14px;
+  margin: 0 20px 10px;
   color: var(--muted);
   font-size: 15px;
   letter-spacing: -0.02em;
@@ -450,29 +477,59 @@ h1 {
   padding: 4px 0 0;
 }
 
-.itin li {
+.itin .stop {
   display: flex;
   gap: 12px;
-  padding: 10px 8px;
-  border-top: 0.5px solid var(--line);
+  align-items: center;
+  padding: 8px;
+  margin-bottom: 2px;
+  background: var(--white);
+  border: 0.5px solid var(--line);
+  border-radius: 16px;
+  animation: stop-in 480ms var(--ease) both;
+  animation-delay: var(--d, 0ms);
 }
 
-.itin li:last-child {
-  border-bottom: 0.5px solid var(--line);
-}
-
-.itin .n {
+.itin .thumb {
+  position: relative;
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  margin-top: 2px;
+  width: 72px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--sand);
+}
+
+.itin .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.itin .thumb b {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--accent);
   color: var(--white);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  line-height: 22px;
+  line-height: 20px;
   text-align: center;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+
+.itin .body {
+  min-width: 0;
+}
+
+.itin .meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .itin time {
@@ -483,27 +540,64 @@ h1 {
   letter-spacing: -0.02em;
 }
 
-.itin em {
+.itin .meta i {
   font-style: normal;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 650;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.itin p {
+.itin .stop p {
   margin: 2px 0 0;
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.03em;
 }
 
-.itin span {
+.itin .stop span {
   display: block;
   margin-top: 2px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.itin .hop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 8px 8px 32px;
+  animation: stop-in 480ms var(--ease) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.itin .hop i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  background: var(--paper);
+  box-shadow: 0 10px 0 -3.2px var(--accent);
+}
+
+.itin .hop em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 550;
+  letter-spacing: -0.01em;
+  color: var(--olive);
+}
+
+@keyframes stop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .sheet-fab {
@@ -816,8 +910,11 @@ h1 {
 
   .city img,
   .hero img,
-  .sheet {
+  .sheet,
+  .itin .stop,
+  .itin .hop {
     transition: none;
     transform: none;
+    animation: none;
   }
 }
