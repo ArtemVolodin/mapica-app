@@ -71,30 +71,30 @@
       <h2 id="places-title">Europe, as a local walks it</h2>
       <p class="intro">Neighborhoods, timing, and the places you’d miss on a list. Mapica Locals plan trips they would give a friend.</p>
       <div class="cities">
-        <a class="city" href="https://apps.apple.com/app/mapica">
+        <button class="city" type="button" data-place="paris" aria-haspopup="dialog">
           <img src="/images/paris.jpg" alt="Paris along the Seine" width="1200" height="800" loading="lazy" />
           <span>Paris</span>
-        </a>
-        <a class="city" href="https://apps.apple.com/app/mapica">
+        </button>
+        <button class="city" type="button" data-place="lisbon" aria-haspopup="dialog">
           <img src="/images/lisbon.jpg" alt="Lisbon yellow tram" width="900" height="1200" loading="lazy" />
           <span>Lisbon</span>
-        </a>
-        <a class="city" href="https://apps.apple.com/app/mapica">
+        </button>
+        <button class="city" type="button" data-place="venice" aria-haspopup="dialog">
           <img src="/images/venice.jpg" alt="Venice canal" width="900" height="1200" loading="lazy" />
           <span>Venice</span>
-        </a>
-        <a class="city" href="https://apps.apple.com/app/mapica">
+        </button>
+        <button class="city" type="button" data-place="barcelona" aria-haspopup="dialog">
           <img src="/images/barcelona.jpg" alt="Barcelona street" width="900" height="1200" loading="lazy" />
           <span>Barcelona</span>
-        </a>
-        <a class="city" href="https://apps.apple.com/app/mapica">
+        </button>
+        <button class="city" type="button" data-place="rome" aria-haspopup="dialog">
           <img src="/images/rome.jpg" alt="Rome" width="900" height="1200" loading="lazy" />
           <span>Rome</span>
-        </a>
-        <a class="city" href="https://apps.apple.com/app/mapica">
+        </button>
+        <button class="city" type="button" data-place="med" aria-haspopup="dialog">
           <img src="/images/med.jpg" alt="Coastal town on the Mediterranean" width="1200" height="800" loading="lazy" />
           <span>The Mediterranean</span>
-        </a>
+        </button>
       </div>
     </section>
 
@@ -182,15 +182,156 @@
       <a href="https://apps.apple.com/app/mapica">App Store</a>
     </nav>
   </footer>
+
+  <div class="sheet-root" id="route-sheet" hidden>
+    <button class="sheet-backdrop" type="button" aria-label="Close"></button>
+    <div
+      class="sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sheet-title"
+    >
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button class="sheet-close" type="button" aria-label="Close">
+        <span aria-hidden="true">×</span>
+      </button>
+      <div class="sheet-hero">
+        <img id="sheet-photo" alt="" width="800" height="480" />
+        <h2 id="sheet-title"></h2>
+      </div>
+      <p class="sheet-lede" id="sheet-lede"></p>
+      <div class="sheet-routes" id="sheet-routes"></div>
+      <a class="btn btn-ink sheet-cta" id="sheet-app" href="https://apps.apple.com/app/mapica">
+        Open in Mapica
+      </a>
+      <p class="sheet-note">Ready routes open in the iPhone app.</p>
+    </div>
+  </div>
+
   <script>
     (function () {
-      var nav = document.getElementById('nav');
-      if (!nav) return;
-      var onScroll = function () {
-        nav.classList.toggle('is-stuck', window.scrollY > 8);
+      var APP = "https://apps.apple.com/app/mapica";
+      var places = {
+        paris: {
+          title: "Paris",
+          lede: "A Local’s walking days — not a checklist of monuments.",
+          routes: [
+            { title: "Hidden Paris in one day", meta: "1 day · 8 places · walk" },
+            { title: "Left Bank, unhurried", meta: "Half day · 5 places · walk" }
+          ]
+        },
+        lisbon: {
+          title: "Lisbon",
+          lede: "Hills, miradouros, and the tables you’d miss on a list.",
+          routes: [
+            { title: "Alfama at walking pace", meta: "1 day · 7 places · walk" },
+            { title: "Trams and an evening table", meta: "2 days · 11 places" }
+          ]
+        },
+        venice: {
+          title: "Venice",
+          lede: "Quieter sestieri, timed for when the day thins out.",
+          routes: [
+            { title: "Cannaregio without the crush", meta: "1 day · 6 places · walk" },
+            { title: "Islands, then home before dusk", meta: "1 day · boat + walk" }
+          ]
+        },
+        barcelona: {
+          title: "Barcelona",
+          lede: "Courtyards, markets, and the grid as a local uses it.",
+          routes: [
+            { title: "Eixample courtyards", meta: "1 day · 7 places · walk" },
+            { title: "Gràcia to the sea", meta: "2 days · 10 places" }
+          ]
+        },
+        rome: {
+          title: "Rome",
+          lede: "Between the sites — shade, lunch, and a slow evening.",
+          routes: [
+            { title: "Quiet Rome between the sites", meta: "1 day · 8 places · walk" },
+            { title: "Trastevere after 18:00", meta: "Evening · 4 places" }
+          ]
+        },
+        med: {
+          title: "The Mediterranean",
+          lede: "Villages and the coast, at a pace you can keep.",
+          routes: [
+            { title: "Riviera villages in one day", meta: "1 day · 6 places" },
+            { title: "Menton to Nice, unhurried", meta: "2 days · walk + rail" }
+          ]
+        }
       };
+
+      var nav = document.getElementById("nav");
+      var root = document.getElementById("route-sheet");
+      var photo = document.getElementById("sheet-photo");
+      var title = document.getElementById("sheet-title");
+      var lede = document.getElementById("sheet-lede");
+      var list = document.getElementById("sheet-routes");
+      var app = document.getElementById("sheet-app");
+      var lastFocus = null;
+
+      function onScroll() {
+        if (!nav) return;
+        nav.classList.toggle("is-stuck", window.scrollY > 8);
+      }
       onScroll();
-      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      function closeSheet() {
+        if (!root || root.hidden) return;
+        root.hidden = true;
+        document.body.style.overflow = "";
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+
+      function openSheet(place, img, trigger) {
+        var data = places[place];
+        if (!data || !root) return;
+        lastFocus = trigger || document.activeElement;
+        photo.src = img;
+        photo.alt = data.title;
+        title.textContent = data.title;
+        lede.textContent = data.lede;
+        app.href = APP;
+        list.innerHTML = data.routes
+          .map(function (r) {
+            return (
+              '<a class="route-lockup" href="' +
+              APP +
+              '">' +
+              '<img src="' +
+              img +
+              '" alt="" />' +
+              "<div><p>" +
+              r.title +
+              "</p><span>" +
+              r.meta +
+              "</span></div></a>"
+            );
+          })
+          .join("");
+        root.hidden = false;
+        document.body.style.overflow = "hidden";
+        var closeBtn = root.querySelector(".sheet-close");
+        if (closeBtn) closeBtn.focus();
+      }
+
+      document.querySelectorAll(".city").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var img = btn.querySelector("img");
+          openSheet(btn.getAttribute("data-place"), img ? img.src : "", btn);
+        });
+      });
+
+      root.addEventListener("click", function (e) {
+        if (e.target.closest(".sheet-backdrop") || e.target.closest(".sheet-close")) {
+          closeSheet();
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeSheet();
+      });
     })();
   </script>
 </body>
