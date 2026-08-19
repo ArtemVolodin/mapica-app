@@ -21,7 +21,6 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -207,7 +206,7 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_6WoxlpUDWhaquFU5UdfsstNzQjMxNs4"></script>
   <script>
     (function () {
       var APP = "https://apps.apple.com/app/mapica";
@@ -331,48 +330,58 @@
       window.addEventListener("scroll", onScroll, { passive: true });
 
       function pinIcon(n) {
-        return L.divIcon({
-          className: "m-pin",
-          html: "<span>" + n + "</span>",
-          iconSize: [26, 26],
-          iconAnchor: [13, 13]
-        });
+        return {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: "#d9684a",
+          fillOpacity: 1,
+          strokeColor: "#ffffff",
+          strokeWeight: 2,
+          scale: 11
+        };
       }
 
       function paintMap(data) {
-        if (!window.L || !mapEl) return;
-        if (liveMap) {
-          liveMap.remove();
-          liveMap = null;
-          mapEl.innerHTML = "";
-        }
+        if (!window.google || !google.maps || !mapEl) return;
+        mapEl.innerHTML = "";
+        liveMap = null;
         var pts = data.stops.map(function (s) {
-          return [s.lat, s.lng];
+          return { lat: s.lat, lng: s.lng };
         });
-        liveMap = L.map(mapEl, {
-          zoomControl: false,
-          attributionControl: true,
-          scrollWheelZoom: false,
-          tapTolerance: 12
+        var bounds = new google.maps.LatLngBounds();
+        pts.forEach(function (p) {
+          bounds.extend(p);
         });
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-          attribution: "&copy; OSM &copy; CARTO",
-          maxZoom: 19
-        }).addTo(liveMap);
-        L.polyline(pts, {
-          color: "#d9684a",
-          weight: 4,
-          opacity: 0.92,
-          lineJoin: "round",
-          lineCap: "round"
-        }).addTo(liveMap);
-        pts.forEach(function (ll, i) {
-          L.marker(ll, { icon: pinIcon(i + 1), keyboard: false }).addTo(liveMap);
+        liveMap = new google.maps.Map(mapEl, {
+          center: pts[0],
+          zoom: 14,
+          disableDefaultUI: true,
+          keyboardShortcuts: false,
+          gestureHandling: "greedy",
+          clickableIcons: false,
+          mapTypeId: "roadmap",
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false
+        });
+        pts.forEach(function (p, i) {
+          new google.maps.Marker({
+            position: p,
+            map: liveMap,
+            clickable: false,
+            icon: pinIcon(i + 1),
+            label: {
+              text: String(i + 1),
+              color: "#ffffff",
+              fontSize: "11px",
+              fontWeight: "700",
+              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif"
+            }
+          });
         });
         setTimeout(function () {
-          liveMap.invalidateSize();
-          liveMap.fitBounds(pts, { padding: [28, 28], maxZoom: 15 });
-        }, 40);
+          google.maps.event.trigger(liveMap, "resize");
+          liveMap.fitBounds(bounds, 36);
+        }, 80);
       }
 
       function foodPhoto(kind) {
@@ -402,14 +411,6 @@
             "</p><span>" +
             s.hint +
             "</span></div></li>";
-          if (data.hops[i]) {
-            html +=
-              '<li class="hop" style="--d:' +
-              (i * 60 + 30) +
-              'ms"><i></i><em>' +
-              data.hops[i] +
-              "</em></li>";
-          }
         });
         itin.innerHTML = html;
       }
@@ -419,7 +420,6 @@
         root.hidden = true;
         document.body.style.overflow = "";
         if (liveMap) {
-          liveMap.remove();
           liveMap = null;
           mapEl.innerHTML = "";
         }
