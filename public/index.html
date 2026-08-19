@@ -195,16 +195,14 @@
       <button class="sheet-close" type="button" aria-label="Close">
         <span aria-hidden="true">×</span>
       </button>
-      <div class="sheet-hero">
-        <img id="sheet-photo" alt="" width="800" height="480" />
-        <h2 id="sheet-title"></h2>
-      </div>
+      <div class="sheet-map" id="sheet-map" aria-hidden="true"></div>
+      <p class="sheet-kicker" id="sheet-kicker"></p>
+      <h2 id="sheet-title"></h2>
       <p class="sheet-lede" id="sheet-lede"></p>
-      <div class="sheet-routes" id="sheet-routes"></div>
-      <a class="btn btn-ink sheet-cta" id="sheet-app" href="https://apps.apple.com/app/mapica">
-        Open in Mapica
+      <ol class="itin" id="sheet-itin"></ol>
+      <a class="sheet-fab" id="sheet-app" href="https://apps.apple.com/app/mapica" aria-label="Open in Mapica">
+        <img src="/images/app-icon-180.png" width="48" height="48" alt="" />
       </a>
-      <p class="sheet-note">Ready routes open in the iPhone app.</p>
     </div>
   </div>
 
@@ -213,61 +211,158 @@
       var APP = "https://apps.apple.com/app/mapica";
       var places = {
         paris: {
-          title: "Paris",
-          lede: "A Local’s walking days — not a checklist of monuments.",
-          routes: [
-            { title: "Hidden Paris in one day", meta: "1 day · 8 places · walk" },
-            { title: "Left Bank, unhurried", meta: "Half day · 5 places · walk" }
+          city: "Paris",
+          title: "Hidden Paris in one day",
+          meta: "1 day · 6 places · walk",
+          lede: "A Local’s day: stay, museum, lunch, island, river light.",
+          path: "M 42 148 C 88 132, 110 88, 148 96 S 210 70, 248 86 S 286 128, 292 58",
+          water: "M 0 170 C 80 150, 160 188, 320 160 L 320 200 L 0 200 Z",
+          pins: [
+            { x: 48, y: 146, n: 1 },
+            { x: 118, y: 102, n: 2 },
+            { x: 168, y: 94, n: 3 },
+            { x: 228, y: 78, n: 4 },
+            { x: 268, y: 108, n: 5 },
+            { x: 292, y: 58, n: 6 }
+          ],
+          stops: [
+            { t: "09:00", kind: "Hotel", name: "Le Marais stay", hint: "Drop bags" },
+            { t: "10:30", kind: "Museum", name: "Picasso Museum", hint: "60 min" },
+            { t: "12:30", kind: "Lunch", name: "Rue des Rosiers", hint: "Table a Local keeps" },
+            { t: "15:00", kind: "Island", name: "Île Saint-Louis", hint: "Walk, no list" },
+            { t: "17:30", kind: "Café", name: "Quai terrace", hint: "Seine light" },
+            { t: "19:30", kind: "Dinner", name: "Hidden courtyard", hint: "Book in the app" }
           ]
         },
         lisbon: {
-          title: "Lisbon",
-          lede: "Hills, miradouros, and the tables you’d miss on a list.",
-          routes: [
-            { title: "Alfama at walking pace", meta: "1 day · 7 places · walk" },
-            { title: "Trams and an evening table", meta: "2 days · 11 places" }
+          city: "Lisbon",
+          title: "Alfama at walking pace",
+          meta: "1 day · 6 places · walk",
+          lede: "Hills, a miradouro, the river — then a table.",
+          path: "M 36 40 C 70 70, 86 110, 120 128 S 170 160, 210 148 S 250 100, 286 168",
+          water: "M 0 150 C 120 170, 220 140, 320 180 L 320 200 L 0 200 Z",
+          pins: [
+            { x: 40, y: 44, n: 1 },
+            { x: 88, y: 108, n: 2 },
+            { x: 132, y: 132, n: 3 },
+            { x: 188, y: 154, n: 4 },
+            { x: 236, y: 118, n: 5 },
+            { x: 286, y: 168, n: 6 }
+          ],
+          stops: [
+            { t: "09:00", kind: "Hotel", name: "Alfama house", hint: "Stay on the hill" },
+            { t: "10:00", kind: "Viewpoint", name: "Portas do Sol", hint: "River first" },
+            { t: "11:30", kind: "Museum", name: "Azulejo Museum", hint: "45 min" },
+            { t: "13:30", kind: "Lunch", name: "Tasca, no English menu", hint: "Local pick" },
+            { t: "16:00", kind: "Walk", name: "Tram 28 stretch", hint: "Walk the line" },
+            { t: "19:00", kind: "Dinner", name: "Miradouro evening", hint: "Open in Mapica" }
           ]
         },
         venice: {
-          title: "Venice",
-          lede: "Quieter sestieri, timed for when the day thins out.",
-          routes: [
-            { title: "Cannaregio without the crush", meta: "1 day · 6 places · walk" },
-            { title: "Islands, then home before dusk", meta: "1 day · boat + walk" }
+          city: "Venice",
+          title: "Cannaregio without the crush",
+          meta: "1 day · 6 places · walk",
+          lede: "Quiet sestieri, a campo, then the lagoon.",
+          path: "M 30 90 C 70 70, 100 120, 140 100 S 190 60, 230 88 S 270 140, 300 120",
+          water: "M 0 40 C 80 80, 40 160, 160 180 C 240 196, 300 120, 320 90 L 320 200 L 0 200 Z",
+          pins: [
+            { x: 34, y: 88, n: 1 },
+            { x: 92, y: 96, n: 2 },
+            { x: 148, y: 98, n: 3 },
+            { x: 202, y: 72, n: 4 },
+            { x: 248, y: 108, n: 5 },
+            { x: 298, y: 122, n: 6 }
+          ],
+          stops: [
+            { t: "09:00", kind: "Hotel", name: "Cannaregio inn", hint: "Away from San Marco" },
+            { t: "10:00", kind: "Church", name: "Madonna dell’Orto", hint: "Quiet hour" },
+            { t: "12:00", kind: "Lunch", name: "Cicchetti at the canal", hint: "Stand, then sit" },
+            { t: "14:30", kind: "Museum", name: "Jewish Ghetto", hint: "45 min" },
+            { t: "17:00", kind: "Walk", name: "Fondamente", hint: "No bridge crush" },
+            { t: "19:30", kind: "Dinner", name: "Campo evening", hint: "Book in the app" }
           ]
         },
         barcelona: {
-          title: "Barcelona",
-          lede: "Courtyards, markets, and the grid as a local uses it.",
-          routes: [
-            { title: "Eixample courtyards", meta: "1 day · 7 places · walk" },
-            { title: "Gràcia to the sea", meta: "2 days · 10 places" }
+          city: "Barcelona",
+          title: "Gràcia to the sea",
+          meta: "1 day · 6 places · walk",
+          lede: "Courtyards, a market, then the grid meets the beach.",
+          path: "M 60 36 C 80 70, 70 110, 100 128 S 160 150, 200 136 S 250 110, 280 168",
+          water: "M 180 170 C 230 150, 280 180, 320 160 L 320 200 L 160 200 Z",
+          pins: [
+            { x: 62, y: 40, n: 1 },
+            { x: 78, y: 92, n: 2 },
+            { x: 112, y: 130, n: 3 },
+            { x: 178, y: 142, n: 4 },
+            { x: 236, y: 122, n: 5 },
+            { x: 278, y: 168, n: 6 }
+          ],
+          stops: [
+            { t: "09:00", kind: "Hotel", name: "Gràcia flat", hint: "Stay in the grid" },
+            { t: "10:00", kind: "Market", name: "Mercat de l’Abaceria", hint: "Coffee first" },
+            { t: "12:00", kind: "Museum", name: "Fundació Miró", hint: "60 min" },
+            { t: "14:30", kind: "Lunch", name: "Eixample courtyard", hint: "Shade" },
+            { t: "17:00", kind: "Walk", name: "Passeig down to the water", hint: "Slow" },
+            { t: "18:30", kind: "Beach", name: "Barceloneta light", hint: "Feet in, then app" }
           ]
         },
         rome: {
-          title: "Rome",
-          lede: "Between the sites — shade, lunch, and a slow evening.",
-          routes: [
-            { title: "Quiet Rome between the sites", meta: "1 day · 8 places · walk" },
-            { title: "Trastevere after 18:00", meta: "Evening · 4 places" }
+          city: "Rome",
+          title: "Quiet Rome between the sites",
+          meta: "1 day · 6 places · walk",
+          lede: "Shade, a museum, lunch, then Trastevere after 18:00.",
+          path: "M 50 60 C 90 50, 120 90, 150 80 S 190 50, 220 88 S 250 140, 280 120",
+          water: "M 200 20 C 240 60, 220 140, 280 180 L 320 200 L 320 0 Z",
+          pins: [
+            { x: 52, y: 58, n: 1 },
+            { x: 108, y: 72, n: 2 },
+            { x: 156, y: 78, n: 3 },
+            { x: 204, y: 64, n: 4 },
+            { x: 238, y: 108, n: 5 },
+            { x: 278, y: 122, n: 6 }
+          ],
+          stops: [
+            { t: "09:00", kind: "Hotel", name: "Monti stay", hint: "Above the Forum" },
+            { t: "10:00", kind: "Museum", name: "Palazzo side rooms", hint: "Skip the queue" },
+            { t: "12:30", kind: "Lunch", name: "Trattoria with no view", hint: "Better food" },
+            { t: "15:00", kind: "Walk", name: "Aventine keyhole", hint: "Shade" },
+            { t: "17:30", kind: "Café", name: "Trastevere before the rush", hint: "Sit" },
+            { t: "19:30", kind: "Dinner", name: "After 18:00 table", hint: "Open in Mapica" }
           ]
         },
         med: {
-          title: "The Mediterranean",
-          lede: "Villages and the coast, at a pace you can keep.",
-          routes: [
-            { title: "Riviera villages in one day", meta: "1 day · 6 places" },
-            { title: "Menton to Nice, unhurried", meta: "2 days · walk + rail" }
+          city: "The Mediterranean",
+          title: "Riviera villages in one day",
+          meta: "1 day · 6 places · walk + rail",
+          lede: "Menton light, a beach hour, Nice before dusk.",
+          path: "M 24 88 C 70 70, 110 110, 150 92 S 210 60, 250 84 S 280 120, 304 70",
+          water: "M 0 100 C 80 130, 160 90, 320 140 L 320 200 L 0 200 Z",
+          pins: [
+            { x: 28, y: 86, n: 1 },
+            { x: 86, y: 82, n: 2 },
+            { x: 148, y: 94, n: 3 },
+            { x: 208, y: 68, n: 4 },
+            { x: 256, y: 92, n: 5 },
+            { x: 304, y: 70, n: 6 }
+          ],
+          stops: [
+            { t: "09:00", kind: "Hotel", name: "Menton old town", hint: "Pastel streets" },
+            { t: "10:30", kind: "Market", name: "Halles", hint: "Fruit, then walk" },
+            { t: "12:30", kind: "Lunch", name: "Port table", hint: "One course" },
+            { t: "14:30", kind: "Beach", name: "Plage des Sablettes", hint: "45 min" },
+            { t: "16:30", kind: "Rail", name: "Along the coast", hint: "Short hop" },
+            { t: "18:30", kind: "Walk", name: "Nice promenade", hint: "Open the full route" }
           ]
         }
       };
 
       var nav = document.getElementById("nav");
       var root = document.getElementById("route-sheet");
-      var photo = document.getElementById("sheet-photo");
+      var mapEl = document.getElementById("sheet-map");
+      var kicker = document.getElementById("sheet-kicker");
       var title = document.getElementById("sheet-title");
       var lede = document.getElementById("sheet-lede");
-      var list = document.getElementById("sheet-routes");
+      var itin = document.getElementById("sheet-itin");
       var app = document.getElementById("sheet-app");
       var lastFocus = null;
 
@@ -278,6 +373,44 @@
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
 
+      function mapSvg(data) {
+        var pins = data.pins
+          .map(function (p) {
+            return (
+              '<g transform="translate(' +
+              p.x +
+              " " +
+              p.y +
+              ')">' +
+              '<circle r="11" fill="#d9684a" stroke="#faf8f3" stroke-width="2.5"/>' +
+              '<text y="4" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="-apple-system, BlinkMacSystemFont, sans-serif">' +
+              p.n +
+              "</text></g>"
+            );
+          })
+          .join("");
+        return (
+          '<svg viewBox="0 0 320 200" role="img">' +
+          '<rect width="320" height="200" fill="#efe8dd"/>' +
+          '<g fill="#e4ded4" opacity="0.9">' +
+          '<rect x="18" y="22" width="52" height="36" rx="6"/>' +
+          '<rect x="84" y="18" width="40" height="44" rx="6"/>' +
+          '<rect x="140" y="28" width="58" height="30" rx="6"/>' +
+          '<rect x="214" y="16" width="46" height="40" rx="6"/>' +
+          '<rect x="40" y="72" width="36" height="28" rx="6"/>' +
+          '<rect x="250" y="128" width="44" height="32" rx="6"/>' +
+          "</g>" +
+          '<path d="' +
+          data.water +
+          '" fill="#c5d4e0" opacity="0.85"/>' +
+          '<path d="' +
+          data.path +
+          '" fill="none" stroke="#d9684a" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="5 6"/>' +
+          pins +
+          "</svg>"
+        );
+      }
+
       function closeSheet() {
         if (!root || root.hidden) return;
         root.hidden = true;
@@ -285,29 +418,29 @@
         if (lastFocus && lastFocus.focus) lastFocus.focus();
       }
 
-      function openSheet(place, img, trigger) {
+      function openSheet(place, trigger) {
         var data = places[place];
         if (!data || !root) return;
         lastFocus = trigger || document.activeElement;
-        photo.src = img;
-        photo.alt = data.title;
+        kicker.textContent = data.city + " · " + data.meta;
         title.textContent = data.title;
         lede.textContent = data.lede;
+        mapEl.innerHTML = mapSvg(data);
         app.href = APP;
-        list.innerHTML = data.routes
-          .map(function (r) {
+        itin.innerHTML = data.stops
+          .map(function (s, i) {
             return (
-              '<a class="route-lockup" href="' +
-              APP +
-              '">' +
-              '<img src="' +
-              img +
-              '" alt="" />' +
-              "<div><p>" +
-              r.title +
+              "<li><span class=\"n\">" +
+              (i + 1) +
+              "</span><div><time>" +
+              s.t +
+              "</time> <em>" +
+              s.kind +
+              "</em><p>" +
+              s.name +
               "</p><span>" +
-              r.meta +
-              "</span></div></a>"
+              s.hint +
+              "</span></div></li>"
             );
           })
           .join("");
@@ -319,8 +452,7 @@
 
       document.querySelectorAll(".city").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          var img = btn.querySelector("img");
-          openSheet(btn.getAttribute("data-place"), img ? img.src : "", btn);
+          openSheet(btn.getAttribute("data-place"), btn);
         });
       });
 
