@@ -483,6 +483,85 @@ h1 {
   gap: 8px;
 }
 
+.foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.foot-links a {
+  text-decoration: none;
+  color: var(--muted);
+}
+
+.foot-links a:hover {
+  color: var(--ink);
+}
+
+.legal {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 36px var(--gutter) 80px;
+}
+
+.legal h1 {
+  margin: 0 0 8px;
+  font-size: clamp(32px, 5vw, 44px);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+
+.legal .meta {
+  margin: 0 0 36px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.legal h2 {
+  margin: 32px 0 10px;
+  font-size: 20px;
+  font-weight: 620;
+  letter-spacing: -0.03em;
+}
+
+.legal p,
+.legal li {
+  color: #3d3c38;
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: -0.015em;
+}
+
+.legal p {
+  margin: 0 0 14px;
+}
+
+.legal ul {
+  margin: 0 0 16px;
+  padding-left: 1.2em;
+}
+
+.legal a {
+  color: var(--accent);
+}
+
+.contact-block {
+  margin: 28px 0 0;
+  padding: 20px 22px;
+  border: 0.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--white);
+}
+
+.contact-block p {
+  margin: 0 0 6px;
+}
+
+.contact-block p:last-child {
+  margin: 0;
+}
+
 .foot-brand img {
   width: 20px;
   height: 20px;
