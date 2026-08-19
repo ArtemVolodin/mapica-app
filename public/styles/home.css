@@ -376,7 +376,7 @@ h1 {
   background: var(--paper);
   border-radius: 28px;
   box-shadow: 0 0 0 0.5px var(--line);
-  padding-bottom: 88px;
+  padding-bottom: 20px;
 }
 
 .sheet-handle {
