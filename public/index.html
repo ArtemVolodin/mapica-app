@@ -21,6 +21,7 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -206,7 +207,7 @@
     </div>
   </div>
 
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_6WoxlpUDWhaquFU5UdfsstNzQjMxNs4"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     (function () {
       var APP = "https://apps.apple.com/app/mapica";
@@ -219,7 +220,6 @@
           meta: "1 day · 6 places · walk",
           lede: "A Local’s day: stay, museum, lunch, island, river light.",
           photo: "/images/paris.jpg",
-          hops: ["Walk · 6 min", "Walk · 4 min", "Walk · 9 min", "Walk · 7 min", "Walk · 8 min"],
           stops: [
             { t: "09:00", kind: "Hotel", name: "Le Marais stay", hint: "Drop bags", lat: 48.8575, lng: 2.362 },
             { t: "10:30", kind: "Museum", name: "Picasso Museum", hint: "60 min", lat: 48.8596, lng: 2.3622 },
@@ -235,7 +235,6 @@
           meta: "1 day · 6 places · walk",
           lede: "Hills, a miradouro, the river — then a table.",
           photo: "/images/lisbon.jpg",
-          hops: ["Walk · 5 min", "Walk · 8 min", "Walk · 11 min", "Walk · 9 min", "Walk · 7 min"],
           stops: [
             { t: "09:00", kind: "Hotel", name: "Alfama house", hint: "Stay on the hill", lat: 38.7115, lng: -9.1298 },
             { t: "10:00", kind: "Viewpoint", name: "Portas do Sol", hint: "River first", lat: 38.7136, lng: -9.1303 },
@@ -251,7 +250,6 @@
           meta: "1 day · 6 places · walk",
           lede: "Quiet sestieri, a campo, then the lagoon.",
           photo: "/images/venice.jpg",
-          hops: ["Walk · 8 min", "Walk · 6 min", "Walk · 5 min", "Walk · 10 min", "Walk · 7 min"],
           stops: [
             { t: "09:00", kind: "Hotel", name: "Cannaregio inn", hint: "Away from San Marco", lat: 45.4448, lng: 12.3265 },
             { t: "10:00", kind: "Church", name: "Madonna dell’Orto", hint: "Quiet hour", lat: 45.4464, lng: 12.3325 },
@@ -267,7 +265,6 @@
           meta: "1 day · 6 places · walk",
           lede: "Courtyards, a market, then the grid meets the beach.",
           photo: "/images/barcelona.jpg",
-          hops: ["Walk · 4 min", "Walk · 22 min", "Walk · 14 min", "Walk · 18 min", "Walk · 12 min"],
           stops: [
             { t: "09:00", kind: "Hotel", name: "Gràcia flat", hint: "Stay in the grid", lat: 41.4036, lng: 2.1574 },
             { t: "10:00", kind: "Market", name: "Mercat de l’Abaceria", hint: "Coffee first", lat: 41.403, lng: 2.1588 },
@@ -283,7 +280,6 @@
           meta: "1 day · 6 places · walk",
           lede: "Shade, a museum, lunch, then Trastevere after 18:00.",
           photo: "/images/rome.jpg",
-          hops: ["Walk · 9 min", "Walk · 8 min", "Walk · 18 min", "Walk · 16 min", "Walk · 4 min"],
           stops: [
             { t: "09:00", kind: "Hotel", name: "Monti stay", hint: "Above the Forum", lat: 41.8954, lng: 12.4908 },
             { t: "10:00", kind: "Museum", name: "Palazzo side rooms", hint: "Skip the queue", lat: 41.8986, lng: 12.4833 },
@@ -299,7 +295,6 @@
           meta: "1 day · 6 places · walk + rail",
           lede: "Menton light, a beach hour, Nice before dusk.",
           photo: "/images/med.jpg",
-          hops: ["Walk · 6 min", "Walk · 8 min", "Walk · 7 min", "Rail · 45 min", "Walk · 12 min"],
           stops: [
             { t: "09:00", kind: "Hotel", name: "Menton old town", hint: "Pastel streets", lat: 43.7745, lng: 7.504 },
             { t: "10:30", kind: "Market", name: "Halles", hint: "Fruit, then walk", lat: 43.7758, lng: 7.5055 },
@@ -330,58 +325,42 @@
       window.addEventListener("scroll", onScroll, { passive: true });
 
       function pinIcon(n) {
-        return {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: "#d9684a",
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
-          strokeWeight: 2,
-          scale: 11
-        };
+        return L.divIcon({
+          className: "m-pin",
+          html: "<span>" + n + "</span>",
+          iconSize: [26, 26],
+          iconAnchor: [13, 13]
+        });
       }
 
       function paintMap(data) {
-        if (!window.google || !google.maps || !mapEl) return;
+        if (!window.L || !mapEl) return;
+        if (liveMap) {
+          liveMap.remove();
+          liveMap = null;
+        }
         mapEl.innerHTML = "";
-        liveMap = null;
         var pts = data.stops.map(function (s) {
-          return { lat: s.lat, lng: s.lng };
+          return [s.lat, s.lng];
         });
-        var bounds = new google.maps.LatLngBounds();
-        pts.forEach(function (p) {
-          bounds.extend(p);
+        liveMap = L.map(mapEl, {
+          zoomControl: false,
+          attributionControl: true,
+          scrollWheelZoom: false
         });
-        liveMap = new google.maps.Map(mapEl, {
-          center: pts[0],
-          zoom: 14,
-          disableDefaultUI: true,
-          keyboardShortcuts: false,
-          gestureHandling: "greedy",
-          clickableIcons: false,
-          mapTypeId: "roadmap",
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false
-        });
-        pts.forEach(function (p, i) {
-          new google.maps.Marker({
-            position: p,
-            map: liveMap,
-            clickable: false,
-            icon: pinIcon(i + 1),
-            label: {
-              text: String(i + 1),
-              color: "#ffffff",
-              fontSize: "11px",
-              fontWeight: "700",
-              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif"
-            }
-          });
+        // Google-like colorful streets (Carto Voyager). App Maps key is iOS-only and cannot load Maps JS on the site.
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+          attribution: "&copy; OpenStreetMap &copy; CARTO",
+          maxZoom: 19,
+          subdomains: "abcd"
+        }).addTo(liveMap);
+        pts.forEach(function (ll, i) {
+          L.marker(ll, { icon: pinIcon(i + 1), keyboard: false }).addTo(liveMap);
         });
         setTimeout(function () {
-          google.maps.event.trigger(liveMap, "resize");
-          liveMap.fitBounds(bounds, 36);
-        }, 80);
+          liveMap.invalidateSize();
+          liveMap.fitBounds(pts, { padding: [28, 28], maxZoom: 15 });
+        }, 40);
       }
 
       function foodPhoto(kind) {
@@ -402,7 +381,7 @@
             pos +
             '"><b>' +
             (i + 1) +
-            "</b></div><div class=\"body\"><div class=\"meta\"><time>" +
+            '</b></div><div class="body"><div class="meta"><time>' +
             s.t +
             "</time><i>" +
             s.kind +
@@ -420,6 +399,7 @@
         root.hidden = true;
         document.body.style.overflow = "";
         if (liveMap) {
+          liveMap.remove();
           liveMap = null;
           mapEl.innerHTML = "";
         }
@@ -458,5 +438,6 @@
       });
     })();
   </script>
+
 </body>
 </html>
