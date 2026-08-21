@@ -328,32 +328,57 @@
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
 
-      function embedSrc(stops) {
-        if (!stops || !stops.length) return "";
-        var a = stops[0];
-        if (stops.length === 1) {
-          return (
-            "https://maps.google.com/maps?q=" +
-            a.lat +
-            "," +
-            a.lng +
-            "&z=15&hl=en&output=embed"
-          );
+      function project(lat, lng) {
+        var siny = Math.sin((lat * Math.PI) / 180);
+        siny = Math.min(Math.max(siny, -0.9999), 0.9999);
+        return {
+          x: 0.5 + lng / 360,
+          y: 0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI)
+        };
+      }
+
+      function fitView(stops, width, height) {
+        var pad = 40;
+        var minLat = Infinity;
+        var maxLat = -Infinity;
+        var minLng = Infinity;
+        var maxLng = -Infinity;
+        stops.forEach(function (s) {
+          if (s.lat < minLat) minLat = s.lat;
+          if (s.lat > maxLat) maxLat = s.lat;
+          if (s.lng < minLng) minLng = s.lng;
+          if (s.lng > maxLng) maxLng = s.lng;
+        });
+        var centerLat = (minLat + maxLat) / 2;
+        var centerLng = (minLng + maxLng) / 2;
+        var zoom = 15;
+        var z;
+        for (z = 16; z >= 3; z--) {
+          var scale = 256 * Math.pow(2, z);
+          var c = project(centerLat, centerLng);
+          var fits = stops.every(function (s) {
+            var p = project(s.lat, s.lng);
+            var x = (p.x - c.x) * scale + width / 2;
+            var y = (p.y - c.y) * scale + height / 2;
+            return x >= pad && x <= width - pad && y >= pad && y <= height - pad;
+          });
+          if (fits) {
+            zoom = z;
+            break;
+          }
         }
-        var rest = stops
-          .slice(1)
-          .map(function (s) {
-            return s.lat + "," + s.lng;
-          })
-          .join("+to:");
+        return { lat: centerLat, lng: centerLng, zoom: zoom };
+      }
+
+      function embedSrc(view) {
         return (
-          "https://maps.google.com/maps?saddr=" +
-          a.lat +
+          "https://maps.google.com/maps?ll=" +
+          view.lat +
           "," +
-          a.lng +
-          "&daddr=" +
-          rest +
-          "&dirflg=w&hl=en&output=embed"
+          view.lng +
+          "&z=" +
+          view.zoom +
+          "&hl=en&output=embed"
         );
       }
 
@@ -361,13 +386,36 @@
         if (!mapEl) return;
         liveMap = null;
         mapEl.innerHTML = "";
+        var w = mapEl.clientWidth || 320;
+        var h = mapEl.clientHeight || 248;
+        var view = fitView(data.stops, w, h);
+        var wrap = document.createElement("div");
+        wrap.className = "gmap-wrap";
         var iframe = document.createElement("iframe");
         iframe.title = (data.city || "Route") + " on Google Maps";
-        iframe.loading = "lazy";
+        iframe.loading = "eager";
         iframe.referrerPolicy = "no-referrer-when-downgrade";
         iframe.allowFullscreen = true;
-        iframe.src = embedSrc(data.stops);
-        mapEl.appendChild(iframe);
+        iframe.src = embedSrc(view);
+        var pins = document.createElement("div");
+        pins.className = "gmap-pins";
+        pins.setAttribute("aria-hidden", "true");
+        var scale = 256 * Math.pow(2, view.zoom);
+        var c = project(view.lat, view.lng);
+        data.stops.forEach(function (s, i) {
+          var p = project(s.lat, s.lng);
+          var x = (p.x - c.x) * scale + w / 2;
+          var y = (p.y - c.y) * scale + h / 2;
+          var el = document.createElement("span");
+          el.className = "gmap-pin";
+          el.textContent = String(i + 1);
+          el.style.left = x + "px";
+          el.style.top = y + "px";
+          pins.appendChild(el);
+        });
+        wrap.appendChild(iframe);
+        wrap.appendChild(pins);
+        mapEl.appendChild(wrap);
       }
 
       function pinIcon() {
