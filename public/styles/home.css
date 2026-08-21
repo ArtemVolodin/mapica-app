@@ -832,19 +832,56 @@ h1 {
 }
 
 .contact-block {
-  margin: 28px 0 0;
-  padding: 20px 22px;
+  margin: 28px 0 8px;
+  padding: 4px 0;
   border: 0.5px solid var(--line);
   border-radius: 16px;
   background: var(--white);
+  overflow: hidden;
 }
 
-.contact-block p {
-  margin: 0 0 6px;
-}
-
-.contact-block p:last-child {
+.contact-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
   margin: 0;
+  padding: 14px 18px;
+  border-bottom: 0.5px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.contact-row:hover .contact-value,
+.contact-row:focus-visible .contact-value {
+  color: var(--accent);
+}
+
+.contact-row-last,
+.contact-row:last-child {
+  border-bottom: 0;
+}
+
+.contact-label {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.contact-value {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 510;
+  letter-spacing: -0.02em;
+  text-align: right;
+  word-break: break-all;
+}
+
+.legal .contact-block + h2 {
+  margin-top: 36px;
 }
 
 .foot-brand img {
