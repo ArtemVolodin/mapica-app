@@ -21,7 +21,6 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -207,10 +206,12 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     (function () {
       var APP = "https://apps.apple.com/app/mapica";
+      // App Maps key is iOS-restricted; Maps JS fails on the site.
+      // Prefer Maps JS when a web key is present; otherwise Google embed (works without JS API).
+      var MAPS_WEB_KEY = "";
       var PHOTO_POS = ["18% 30%", "72% 22%", "40% 68%", "82% 48%", "12% 78%", "58% 18%"];
       var FOOD = { Lunch: 1, Dinner: 1, Café: 1 };
       var places = {
@@ -316,6 +317,9 @@
       var app = document.getElementById("sheet-app");
       var lastFocus = null;
       var liveMap = null;
+      var mapsReady = null;
+      var mapsFailed = false;
+      var pendingMap = null;
 
       function onScroll() {
         if (!nav) return;
@@ -324,43 +328,163 @@
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
 
-      function pinIcon(n) {
-        return L.divIcon({
-          className: "m-pin",
-          html: "<span>" + n + "</span>",
-          iconSize: [26, 26],
-          iconAnchor: [13, 13]
+      function embedSrc(stops) {
+        if (!stops || !stops.length) return "";
+        var a = stops[0];
+        if (stops.length === 1) {
+          return (
+            "https://maps.google.com/maps?q=" +
+            a.lat +
+            "," +
+            a.lng +
+            "&z=15&hl=en&output=embed"
+          );
+        }
+        var rest = stops
+          .slice(1)
+          .map(function (s) {
+            return s.lat + "," + s.lng;
+          })
+          .join("+to:");
+        return (
+          "https://maps.google.com/maps?saddr=" +
+          a.lat +
+          "," +
+          a.lng +
+          "&daddr=" +
+          rest +
+          "&dirflg=w&hl=en&output=embed"
+        );
+      }
+
+      function paintEmbed(data) {
+        if (!mapEl) return;
+        liveMap = null;
+        mapEl.innerHTML = "";
+        var iframe = document.createElement("iframe");
+        iframe.title = (data.city || "Route") + " on Google Maps";
+        iframe.loading = "lazy";
+        iframe.referrerPolicy = "no-referrer-when-downgrade";
+        iframe.allowFullscreen = true;
+        iframe.src = embedSrc(data.stops);
+        mapEl.appendChild(iframe);
+      }
+
+      function pinIcon() {
+        return {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: "#d9684a",
+          fillOpacity: 1,
+          strokeColor: "#ffffff",
+          strokeWeight: 2,
+          scale: 11
+        };
+      }
+
+      function paintGoogle(data) {
+        if (!window.google || !google.maps || !mapEl) {
+          paintEmbed(data);
+          return;
+        }
+        mapEl.innerHTML = "";
+        liveMap = null;
+        var pts = data.stops.map(function (s) {
+          return { lat: s.lat, lng: s.lng };
         });
+        var bounds = new google.maps.LatLngBounds();
+        pts.forEach(function (p) {
+          bounds.extend(p);
+        });
+        liveMap = new google.maps.Map(mapEl, {
+          center: pts[0],
+          zoom: 14,
+          disableDefaultUI: true,
+          keyboardShortcuts: false,
+          gestureHandling: "greedy",
+          clickableIcons: false,
+          mapTypeId: "roadmap",
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false
+        });
+        pts.forEach(function (p, i) {
+          new google.maps.Marker({
+            position: p,
+            map: liveMap,
+            clickable: false,
+            icon: pinIcon(),
+            label: {
+              text: String(i + 1),
+              color: "#ffffff",
+              fontSize: "11px",
+              fontWeight: "700",
+              fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif"
+            }
+          });
+        });
+        setTimeout(function () {
+          if (!liveMap) return;
+          google.maps.event.trigger(liveMap, "resize");
+          liveMap.fitBounds(bounds, 36);
+        }, 80);
+      }
+
+      function ensureGoogleMaps(done) {
+        if (!MAPS_WEB_KEY || mapsFailed) {
+          done(false);
+          return;
+        }
+        if (window.google && google.maps) {
+          done(true);
+          return;
+        }
+        if (mapsReady) {
+          mapsReady.push(done);
+          return;
+        }
+        mapsReady = [done];
+        window.gm_authFailure = function () {
+          mapsFailed = true;
+          var q = mapsReady || [];
+          mapsReady = null;
+          q.forEach(function (fn) {
+            fn(false);
+          });
+          if (pendingMap) paintEmbed(pendingMap);
+        };
+        window.__mapicaGmReady = function () {
+          if (mapsFailed) return;
+          var q = mapsReady || [];
+          mapsReady = null;
+          q.forEach(function (fn) {
+            fn(true);
+          });
+        };
+        var s = document.createElement("script");
+        s.async = true;
+        s.defer = true;
+        s.src =
+          "https://maps.googleapis.com/maps/api/js?key=" +
+          encodeURIComponent(MAPS_WEB_KEY) +
+          "&callback=__mapicaGmReady";
+        s.onerror = function () {
+          mapsFailed = true;
+          var q = mapsReady || [];
+          mapsReady = null;
+          q.forEach(function (fn) {
+            fn(false);
+          });
+        };
+        document.head.appendChild(s);
       }
 
       function paintMap(data) {
-        if (!window.L || !mapEl) return;
-        if (liveMap) {
-          liveMap.remove();
-          liveMap = null;
-        }
-        mapEl.innerHTML = "";
-        var pts = data.stops.map(function (s) {
-          return [s.lat, s.lng];
+        pendingMap = data;
+        ensureGoogleMaps(function (ok) {
+          if (pendingMap !== data) return;
+          if (ok) paintGoogle(data);
+          else paintEmbed(data);
         });
-        liveMap = L.map(mapEl, {
-          zoomControl: false,
-          attributionControl: true,
-          scrollWheelZoom: false
-        });
-        // Google-like colorful streets (Carto Voyager). App Maps key is iOS-only and cannot load Maps JS on the site.
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-          attribution: "&copy; OpenStreetMap &copy; CARTO",
-          maxZoom: 19,
-          subdomains: "abcd"
-        }).addTo(liveMap);
-        pts.forEach(function (ll, i) {
-          L.marker(ll, { icon: pinIcon(i + 1), keyboard: false }).addTo(liveMap);
-        });
-        setTimeout(function () {
-          liveMap.invalidateSize();
-          liveMap.fitBounds(pts, { padding: [28, 28], maxZoom: 15 });
-        }, 40);
       }
 
       function foodPhoto(kind) {
@@ -398,11 +522,9 @@
         if (!root || root.hidden) return;
         root.hidden = true;
         document.body.style.overflow = "";
-        if (liveMap) {
-          liveMap.remove();
-          liveMap = null;
-          mapEl.innerHTML = "";
-        }
+        pendingMap = null;
+        liveMap = null;
+        if (mapEl) mapEl.innerHTML = "";
         if (lastFocus && lastFocus.focus) lastFocus.focus();
       }
 
