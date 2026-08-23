@@ -1,8 +1,8 @@
 /* /local — extends home.css; Local-only accent overrides. */
 
 :root {
-  --color-local: #4a947f;
-  --color-local-press: #3d7f6c;
+  --color-local: #4f969b;
+  --color-local-press: #3f7a80;
 }
 
 button.nav-cta {
