@@ -7,6 +7,8 @@
   --wash: #f2f2f7;
   --accent: #d9684a;
   --accent-press: #c2563c;
+  --color-sea: #3a9ca8;
+  --color-sea-press: #318894;
   --success: #3d7a4a;
   --gutter: max(20px, env(safe-area-inset-left, 0px));
   --gutter-r: max(20px, env(safe-area-inset-right, 0px));
@@ -88,7 +90,7 @@ body {
   place-items: center;
   font-size: 40px;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--color-sea);
 }
 
 .kicker {
@@ -97,7 +99,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--color-sea);
 }
 
 .hero h1 {
@@ -136,7 +138,7 @@ body {
 .trust {
   font-size: 13px;
   font-weight: 600;
-  color: var(--success);
+  color: var(--color-sea);
 }
 
 .trust.muted {

@@ -9,6 +9,8 @@
   --accent-press: #c2563c;
   --color-local: #377f79;
   --color-local-press: #2f6b66;
+  --color-sea: #3a9ca8;
+  --color-sea-press: #318894;
   --white: #ffffff;
   --gutter: clamp(20px, 4vw, 56px);
   --max: 1180px;
