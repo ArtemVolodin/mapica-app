@@ -1,8 +1,8 @@
 /* /local — extends home.css; Local-only accent overrides. */
 
 :root {
-  --color-local: #377f79;
-  --color-local-press: #2f6b66;
+  --color-local: #2a8fc4;
+  --color-local-press: #2279a8;
 }
 
 button.nav-cta {
@@ -209,7 +209,7 @@ button.nav-cta {
 
 .ui-earn-row span:last-child {
   font-weight: 700;
-  color: var(--olive);
+  color: var(--color-local);
 }
 
 .local-handle {
