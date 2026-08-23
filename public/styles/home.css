@@ -99,6 +99,26 @@ a {
   flex-shrink: 0;
 }
 
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+.nav-link {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link[aria-current="page"] {
+  color: var(--ink);
+}
+
 .nav-cta {
   display: inline-flex;
   align-items: center;
@@ -925,6 +945,14 @@ h1 {
 }
 
 @media (max-width: 860px) {
+  .nav-links {
+    gap: 10px;
+  }
+
+  .nav-link {
+    font-size: 13px;
+  }
+
   .hero {
     margin: 0 12px;
     border-radius: 24px;

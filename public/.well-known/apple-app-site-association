@@ -7,12 +7,16 @@
         "paths": [
           "/route/*",
           "/l/*",
+          "/local/apply",
+          "/local/apply/*",
+          "NOT /local",
           "NOT /",
           "NOT /privacy",
           "NOT /terms",
           "NOT /contact",
           "NOT /images/*",
           "NOT /styles/*",
+          "NOT /scripts/*",
           "NOT /.well-known/*",
           "/*"
         ]
