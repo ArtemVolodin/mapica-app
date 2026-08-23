@@ -3,7 +3,8 @@
     { "source": "/route/:slug", "destination": "/api/route?slug=:slug" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
-    { "source": "/contact", "destination": "/contact.html" }
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/:slug", "destination": "/api/local?slug=:slug" }
   ],
   "headers": [
     {
@@ -39,6 +40,15 @@
         {
           "key": "Cache-Control",
           "value": "public, s-maxage=120, stale-while-revalidate=600"
+        }
+      ]
+    },
+    {
+      "source": "/:slug",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=60, stale-while-revalidate=300"
         }
       ]
     },

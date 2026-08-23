@@ -4,7 +4,18 @@
     "details": [
       {
         "appID": "P7HMLPQ252.com.mapica.mapica2",
-        "paths": ["/route/*"]
+        "paths": [
+          "/route/*",
+          "/l/*",
+          "NOT /",
+          "NOT /privacy",
+          "NOT /terms",
+          "NOT /contact",
+          "NOT /images/*",
+          "NOT /styles/*",
+          "NOT /.well-known/*",
+          "/*"
+        ]
       }
     ]
   }

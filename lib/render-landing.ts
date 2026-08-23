@@ -100,7 +100,11 @@ export function renderLanding(preview: RoutePreview, env: SiteEnv = {}): string 
       <h1>${escapeHtml(title)}</h1>
       <p class="price"><span>from</span> ${escapeHtml(price)}</p>
     </div>
-    <p class="by">${escapeHtml(preview.local_display_name)}</p>
+    <p class="by">${
+      preview.local_slug
+        ? `<a href="/${escapeHtml(preview.local_slug)}">${escapeHtml(preview.local_display_name)}</a>`
+        : escapeHtml(preview.local_display_name)
+    }</p>
     <p class="pitch">${escapeHtml(description)}</p>
     <ul class="facts">
       <li>${escapeHtml(daysLabel)}</li>

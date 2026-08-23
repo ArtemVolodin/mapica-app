@@ -23,8 +23,8 @@ const HEAD_META = `
   <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <link rel="icon" type="image/png" href="/images/app-icon-180.png" />
-  <link rel="apple-touch-icon" href="/images/app-icon.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 `;
 
 function escapeHtml(value) {
@@ -129,7 +129,11 @@ function renderLanding(preview) {
       <h1>${escapeHtml(title)}</h1>
       <p class="price"><span>from</span> ${escapeHtml(price)}</p>
     </div>
-    <p class="by">${escapeHtml(preview.local_display_name)}</p>
+    <p class="by">${
+      preview.local_slug
+        ? `<a href="/${escapeHtml(preview.local_slug)}">${escapeHtml(preview.local_display_name)}</a>`
+        : escapeHtml(preview.local_display_name)
+    }</p>
     <p class="pitch">${escapeHtml(description)}</p>
     <ul class="facts">
       <li>${escapeHtml(daysLabel)}</li>
