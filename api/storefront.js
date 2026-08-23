@@ -287,7 +287,7 @@ function renderLocalPage(preview, env = {}) {
   const handleJs = JSON.stringify(handle);
   const creatorIdJs = JSON.stringify(preview.creator_id);
   const followLabel = preview.is_following ? "Following" : "Follow";
-  const followClass = preview.is_following ? "btn btn-outline is-following" : "btn btn-outline";
+  const followClass = preview.is_following ? "btn btn-outline is-following" : "btn btn-primary";
   const ratingHtml = preview.show_rating && preview.creator_rating != null ? `<p class="creator-rating">\u2605 ${Number(preview.creator_rating).toFixed(1)} \xB7 ${preview.reviews_count} review${preview.reviews_count === 1 ? "" : "s"}</p>` : "";
   const instagram = preview.instagram_url?.trim();
   const instagramHtml = instagram ? `<a class="trust link" href="${escapeHtml(instagram)}" target="_blank" rel="noopener noreferrer">Instagram \u2197</a>` : "";
@@ -421,6 +421,8 @@ function renderLocalPage(preview, env = {}) {
         if (!btn) return;
         btn.textContent = following ? 'Following' : 'Follow';
         btn.classList.toggle('is-following', !!following);
+        btn.classList.toggle('btn-primary', !following);
+        btn.classList.toggle('btn-outline', !!following);
         btn.setAttribute('data-following', following ? '1' : '0');
         if (typeof followersCount === 'number') {
           var stats = document.querySelector('.stats');
