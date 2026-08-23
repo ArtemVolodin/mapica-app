@@ -775,11 +775,12 @@ h1 {
   gap: 12px;
   max-width: var(--max);
   margin: 0 auto;
-  padding: 0 var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px));
+  padding: 22px max(var(--gutter), env(safe-area-inset-right, 0px))
+    max(28px, calc(16px + env(safe-area-inset-bottom, 0px)))
+    max(var(--gutter), env(safe-area-inset-left, 0px));
   color: var(--muted);
   font-size: 13px;
   border-top: 0.5px solid var(--line);
-  padding-top: 22px;
 }
 
 .foot-brand {
@@ -795,6 +796,11 @@ h1 {
 }
 
 .foot-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 2px;
   text-decoration: none;
   color: var(--muted);
 }
@@ -807,16 +813,15 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px 22px;
+  gap: 8px 18px;
 }
 
 .foot-social {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin: -8px;
+  width: 44px;
+  height: 44px;
   color: var(--muted);
   border-radius: 50%;
   transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
@@ -982,6 +987,35 @@ h1 {
 
   .section {
     padding: 56px var(--gutter);
+  }
+
+  /* Apple HIG: center secondary chrome on narrow screens; keep ≥44pt targets. */
+  .foot {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding-top: 28px;
+    padding-bottom: max(36px, calc(20px + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .foot-brand {
+    justify-content: center;
+  }
+
+  .foot-end {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .foot-links {
+    justify-content: center;
+    gap: 4px 8px;
+  }
+
+  .foot-links a {
+    padding: 0 8px;
   }
 }
 
