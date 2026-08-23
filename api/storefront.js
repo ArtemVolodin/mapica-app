@@ -17,12 +17,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// api/local.ts
-var local_exports = {};
-__export(local_exports, {
+// api/storefront.ts
+var storefront_exports = {};
+__export(storefront_exports, {
   default: () => handler
 });
-module.exports = __toCommonJS(local_exports);
+module.exports = __toCommonJS(storefront_exports);
 
 // lib/env.ts
 function readEnv(source) {
@@ -479,7 +479,7 @@ function renderLocalPage(preview, env = {}) {
 </html>`;
 }
 
-// api/local.ts
+// api/storefront.ts
 function normalizeSlug(raw) {
   return raw.trim().replace(/^@+/, "");
 }

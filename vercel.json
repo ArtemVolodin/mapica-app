@@ -5,7 +5,7 @@
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/:slug", "destination": "/api/local?slug=:slug" }
+    { "source": "/:slug", "destination": "/api/storefront?slug=:slug" }
   ],
   "headers": [
     {
