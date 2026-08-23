@@ -1,7 +1,11 @@
 (function () {
-  // Mirrors lib/core/services/trip_pricing_service.dart (routeListingCommissionRate + base splits).
+  // Mirrors lib/core/services/trip_pricing_service.dart
   var CONFIG = {
+    // private_beta | app_store
+    distribution: 'private_beta',
+    testFlightUrl: '', // set public TestFlight invite URL when ready
     appStore: 'https://apps.apple.com/app/mapica',
+    contactUrl: '/contact.html',
     exampleProfile: 'https://mapica.app/@artem',
     routeCommissionRate: 0.2,
     personalTrip: { price: 39, localPayout: 30, mapicaRevenue: 9 },
@@ -10,9 +14,15 @@
     applyPath: '/local/apply',
   };
 
+  function joinUrl() {
+    if (CONFIG.distribution === 'private_beta') {
+      return CONFIG.testFlightUrl || CONFIG.contactUrl;
+    }
+    return CONFIG.appStore;
+  }
+
   function applyUrl(source) {
-    var url = CONFIG.applyPath + '?source=' + encodeURIComponent(source || 'become_local');
-    return url;
+    return CONFIG.applyPath + '?source=' + encodeURIComponent(source || 'become_local');
   }
 
   function isMobile() {
@@ -48,6 +58,17 @@
     if (tripPrice) tripPrice.textContent = formatMoney(pt.price);
     if (tripLocal) tripLocal.textContent = formatMoney(pt.localPayout);
     if (tripMapica) tripMapica.textContent = formatMoney(pt.mapicaRevenue);
+
+    var note = document.getElementById('money-split-note');
+    if (note) {
+      var pct = Math.round((pt.localPayout / pt.price) * 100);
+      note.textContent =
+        'Ready routes: 80% yours. Personal trips use Mapica’s base trip pricing — about ' +
+        pct +
+        '% yours on the starter €' +
+        pt.price +
+        ' trip.';
+    }
   }
 
   var modalRoot = null;
@@ -57,17 +78,6 @@
     modalRoot = document.createElement('div');
     modalRoot.className = 'local-modal-root';
     modalRoot.hidden = true;
-    modalRoot.innerHTML =
-      '<button class="local-modal-backdrop" type="button" aria-label="Close"></button>' +
-      '<div class="local-modal" role="dialog" aria-modal="true" aria-labelledby="local-modal-title">' +
-      '<button class="local-modal-close" type="button" aria-label="Close"><span aria-hidden="true">×</span></button>' +
-      '<h2 id="local-modal-title">Create your Local profile in Mapica</h2>' +
-      '<p class="local-modal-lede">Scan with your iPhone to open Mapica and start as a Local.</p>' +
-      '<img class="local-modal-qr" id="local-modal-qr" width="200" height="200" alt="" />' +
-      '<a class="btn btn-primary local-modal-store" id="local-modal-store" href="' +
-      CONFIG.appStore +
-      '">Download on the App Store</a>' +
-      '</div>';
     document.body.appendChild(modalRoot);
     modalRoot.addEventListener('click', function (e) {
       if (e.target.closest('.local-modal-backdrop') || e.target.closest('.local-modal-close')) {
@@ -80,19 +90,77 @@
     return modalRoot;
   }
 
+  function betaModalHtml(joinHref) {
+    var hasTestFlight = !!CONFIG.testFlightUrl;
+    var primaryLabel = hasTestFlight ? 'Join on TestFlight' : 'Request early access';
+    var qrBlock = hasTestFlight
+      ? '<img class="local-modal-qr" id="local-modal-qr" width="200" height="200" alt="" />'
+      : '';
+    var lede = hasTestFlight
+      ? 'Scan with your iPhone to join the private beta and start as a Local.'
+      : 'Leave a short note — we’ll send you a TestFlight invite to start as a Local.';
+    return (
+      '<button class="local-modal-backdrop" type="button" aria-label="Close"></button>' +
+      '<div class="local-modal" role="dialog" aria-modal="true" aria-labelledby="local-modal-title">' +
+      '<button class="local-modal-close" type="button" aria-label="Close"><span aria-hidden="true">×</span></button>' +
+      '<p class="local-modal-kicker">Private beta</p>' +
+      '<h2 id="local-modal-title">Mapica is currently in private beta.</h2>' +
+      '<p class="local-modal-lede">Join as one of our first Local Creators.</p>' +
+      '<p class="local-modal-lede">' +
+      lede +
+      '</p>' +
+      qrBlock +
+      '<a class="btn btn-primary local-modal-store" id="local-modal-store" href="' +
+      joinHref +
+      '">' +
+      primaryLabel +
+      '</a>' +
+      '</div>'
+    );
+  }
+
+  function storeModalHtml(target, storeHref) {
+    return (
+      '<button class="local-modal-backdrop" type="button" aria-label="Close"></button>' +
+      '<div class="local-modal" role="dialog" aria-modal="true" aria-labelledby="local-modal-title">' +
+      '<button class="local-modal-close" type="button" aria-label="Close"><span aria-hidden="true">×</span></button>' +
+      '<h2 id="local-modal-title">Create your Local profile in Mapica</h2>' +
+      '<p class="local-modal-lede">Scan with your iPhone to open Mapica and start as a Local.</p>' +
+      '<img class="local-modal-qr" id="local-modal-qr" width="200" height="200" alt="" />' +
+      '<a class="btn btn-primary local-modal-store" id="local-modal-store" href="' +
+      storeHref +
+      '">Download on the App Store</a>' +
+      '</div>'
+    );
+  }
+
   function openModal(source) {
     var root = ensureModal();
-    var target = new URL(applyUrl(source), window.location.origin).href;
-    var qr = root.querySelector('#local-modal-qr');
-    if (qr) {
-      qr.src =
-        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
-        encodeURIComponent(target);
-      qr.alt = 'QR code to open Mapica Local onboarding';
+    var joinHref = joinUrl();
+    if (CONFIG.distribution === 'private_beta') {
+      root.innerHTML = betaModalHtml(joinHref);
+      var qr = root.querySelector('#local-modal-qr');
+      if (qr && CONFIG.testFlightUrl) {
+        qr.src =
+          'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
+          encodeURIComponent(CONFIG.testFlightUrl);
+        qr.alt = 'QR code to join Mapica on TestFlight';
+      }
+    } else {
+      var target = new URL(applyUrl(source), window.location.origin).href;
+      root.innerHTML = storeModalHtml(target, CONFIG.appStore);
+      var qr2 = root.querySelector('#local-modal-qr');
+      if (qr2) {
+        qr2.src =
+          'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' +
+          encodeURIComponent(target);
+        qr2.alt = 'QR code to open Mapica Local onboarding';
+      }
     }
     root.hidden = false;
     document.body.style.overflow = 'hidden';
-    root.querySelector('.local-modal-close')?.focus();
+    var closeBtn = root.querySelector('.local-modal-close');
+    if (closeBtn) closeBtn.focus();
   }
 
   function closeModal() {
@@ -104,6 +172,15 @@
   function openBecomeLocal(source, location) {
     if (location && typeof window.__mapicaTrack === 'function') {
       window.__mapicaTrack('local_cta_click', { location: location, source: source || 'become_local' });
+    }
+
+    if (CONFIG.distribution === 'private_beta') {
+      if (isMobile() && CONFIG.testFlightUrl) {
+        window.location.href = CONFIG.testFlightUrl;
+        return;
+      }
+      openModal(source);
+      return;
     }
 
     if (isMobile() && isIOS()) {

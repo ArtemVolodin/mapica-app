@@ -28,8 +28,8 @@
   <header class="nav" id="nav">
     <a class="brand" href="/"><img class="mark" src="/images/app-icon-180.png" width="32" height="32" alt="" /> Mapica</a>
     <div class="nav-links">
-      <a class="nav-link" href="/local" aria-current="page">For Locals</a>
-      <a class="nav-cta" href="https://apps.apple.com/app/mapica">Get the app</a>
+      <a class="nav-link" href="/">For Travelers</a>
+      <button type="button" class="nav-cta" data-local-cta data-source="become_local" data-location="header">Get the app</button>
     </div>
   </header>
 
@@ -62,22 +62,37 @@
           <div class="local-step-num" aria-hidden="true"></div>
           <h3>Create</h3>
           <p>Build a route you would give a friend. Your cafés. Your streets. Your viewpoints. Your timing.</p>
-          <div class="local-visual">
-            <img src="/images/med.jpg" alt="" loading="lazy" width="1200" height="800" />
+          <div class="ui-mock ui-mock-builder" aria-hidden="true">
+            <div class="ui-mock-bar">Route Builder</div>
+            <div class="ui-mock-row"><span class="ui-dot">1</span><span>Cours Saleya market</span><span class="ui-time">09:30</span></div>
+            <div class="ui-mock-row"><span class="ui-dot">2</span><span>Coffee at Café de Turin</span><span class="ui-time">11:00</span></div>
+            <div class="ui-mock-row"><span class="ui-dot">3</span><span>Castle Hill viewpoint</span><span class="ui-time">16:00</span></div>
+            <div class="ui-mock-foot">My Sunday in Nice · 1 day</div>
           </div>
         </article>
         <article class="local-step-card">
           <div class="local-step-num" aria-hidden="true"></div>
           <h3>Publish</h3>
           <p>Get your own Mapica page. Share your routes with friends, followers, and travelers.</p>
-          <span class="local-handle">mapica.app/@camille</span>
+          <div class="ui-mock ui-mock-profile" aria-hidden="true">
+            <div class="ui-avatar">C</div>
+            <p class="ui-kicker">Local Creator</p>
+            <p class="ui-name">Camille</p>
+            <p class="ui-meta">Nice · Côte d’Azur</p>
+            <p class="ui-stats">3 routes</p>
+            <span class="local-handle">mapica.app/@camille</span>
+          </div>
         </article>
         <article class="local-step-card">
           <div class="local-step-num" aria-hidden="true"></div>
           <h3>Earn</h3>
           <p>Travelers can buy your ready-made routes or ask you to create a personal trip just for them.</p>
-          <div class="local-visual">
-            <img src="/images/lisbon.jpg" alt="" loading="lazy" width="900" height="1200" />
+          <div class="ui-mock ui-mock-earn" aria-hidden="true">
+            <div class="ui-mock-bar">Earnings</div>
+            <div class="ui-earn-total">€148.80</div>
+            <p class="ui-earn-label">Available this month</p>
+            <div class="ui-earn-row"><span>Ready route · €12</span><span>+€9.60</span></div>
+            <div class="ui-earn-row"><span>Personal trip · €39</span><span>+€30</span></div>
           </div>
         </article>
       </div>
@@ -87,17 +102,43 @@
       <h2 id="profile-title">Your page.<br />Your taste.<br />Your routes.</h2>
       <p class="intro">Every Local gets a public Mapica page to share anywhere — no website to build, no second account to manage.</p>
       <div class="local-profile-demo" aria-label="Example Local Creator profile (demo)">
-        <p class="demo-kicker">Local Creator</p>
-        <h3>Camille</h3>
-        <p class="demo-meta">Nice · Côte d’Azur</p>
-        <div class="demo-pills">
-          <span class="demo-pill">Food</span>
-          <span class="demo-pill">Hidden places</span>
-          <span class="demo-pill">Slow travel</span>
+        <div class="demo-hero">
+          <div class="demo-avatar" aria-hidden="true">C</div>
+          <p class="demo-kicker">Local Creator</p>
+          <h3>Camille</h3>
+          <p class="demo-meta">Nice · Côte d’Azur</p>
+          <p class="demo-bio">Living in Nice and sharing slow routes through markets, cafés, and places I recommend to friends.</p>
+          <p class="demo-stats">3 routes</p>
+          <div class="demo-pills">
+            <span class="demo-pill">Food</span>
+            <span class="demo-pill">Hidden places</span>
+            <span class="demo-pill">Slow travel</span>
+          </div>
         </div>
-        <div class="demo-route"><span>My Sunday in Nice</span><span>€12</span></div>
-        <div class="demo-route"><span>Villages above the Mediterranean</span><span>€15</span></div>
-        <div class="demo-route"><span>Nice with kids</span><span>€9</span></div>
+        <article class="demo-route-card">
+          <img src="/images/cafe.jpg" alt="" loading="lazy" width="640" height="400" />
+          <div class="demo-route-copy">
+            <h4>My Sunday in Nice</h4>
+            <p>Markets, coffee, and a late walk to the sea</p>
+            <div class="demo-route-foot"><span>1 day · 6 places</span><strong>€12</strong></div>
+          </div>
+        </article>
+        <article class="demo-route-card">
+          <img src="/images/med.jpg" alt="" loading="lazy" width="640" height="400" />
+          <div class="demo-route-copy">
+            <h4>Villages above the Mediterranean</h4>
+            <p>Hill towns and quiet viewpoints</p>
+            <div class="demo-route-foot"><span>1 day · 5 places</span><strong>€15</strong></div>
+          </div>
+        </article>
+        <article class="demo-route-card">
+          <img src="/images/lisbon.jpg" alt="" loading="lazy" width="640" height="400" />
+          <div class="demo-route-copy">
+            <h4>Nice with kids</h4>
+            <p>Easy pace, parks, and gelato stops</p>
+            <div class="demo-route-foot"><span>1 day · 4 places</span><strong>€9</strong></div>
+          </div>
+        </article>
       </div>
       <p class="local-profile-demo-note">Demo profile for illustration — not live creator data.</p>
       <p style="text-align:center;margin-top:24px;">
@@ -162,6 +203,7 @@
           </div>
         </article>
       </div>
+      <p class="local-money-note" id="money-split-note">Ready routes: 80% yours. Personal trips use Mapica’s base trip pricing — about 77% yours on the starter €39 trip.</p>
       <p class="local-money-note">No joining fee. No monthly subscription.</p>
     </section>
 
@@ -221,7 +263,7 @@
         <h2 id="final-title">Someone is going<br />where you already know.</h2>
         <p>Show them your version of the place.</p>
         <button type="button" class="btn btn-primary" data-local-cta data-source="become_local" data-location="final">Become a Local</button>
-        <p class="fine">Free to join · Create your first route in Mapica</p>
+        <p class="fine">Private beta · Free to join · Create your first route in Mapica</p>
       </div>
     </section>
   </main>
