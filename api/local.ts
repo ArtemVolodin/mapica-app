@@ -22,13 +22,12 @@ export default async function handler(
   }
 
   const slug = normalizeSlug(String(req.query.slug ?? ''));
-  if (
-    !slug ||
-    slug.length > 120 ||
-    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug) ||
-    isReservedLocalSlug(slug)
-  ) {
-    res.status(400).send('Invalid slug');
+  if (!slug || slug.length > 120) {
+    res.status(404).send('Not found');
+    return;
+  }
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug) || isReservedLocalSlug(slug)) {
+    res.status(404).send('Not found');
     return;
   }
 

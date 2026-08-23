@@ -5,8 +5,11 @@
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/@:handle/:routeSlug", "destination": "/api/route?slug=:routeSlug" },
-    { "source": "/@:slug", "destination": "/api/local?slug=:slug" },
-    { "source": "/:slug", "destination": "/api/local?slug=:slug" }
+    { "source": "/@:handle", "destination": "/api/local?slug=:handle" },
+    {
+      "source": "/:slug((?!api|styles|images|route|routes|privacy|terms|contact|favicon\\.png|apple-touch-icon\\.png|og-default\\.svg|index\\.html).+)",
+      "destination": "/api/local?slug=:slug"
+    }
   ],
   "headers": [
     {
@@ -46,7 +49,7 @@
       ]
     },
     {
-      "source": "/@:slug",
+      "source": "/@:handle",
       "headers": [
         {
           "key": "Cache-Control",
