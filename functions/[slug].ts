@@ -1,10 +1,10 @@
-import { readEnv, type SiteEnv } from '../../lib/env';
-import { fetchLocalPreview } from '../../lib/fetch-preview';
+import { readEnv, type SiteEnv } from '../lib/env';
+import { fetchLocalPreview } from '../lib/fetch-preview';
 import {
   isReservedLocalSlug,
   renderLocalNotFound,
   renderLocalPage,
-} from '../../lib/render-local';
+} from '../lib/render-local';
 
 type PagesContext = {
   params: { slug: string };

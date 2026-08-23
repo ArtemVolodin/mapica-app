@@ -21,7 +21,7 @@ function appStoreUrl(env: SiteEnv): string {
 
 const HEAD_META = `
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="#faf8f3" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="icon" type="image/png" href="/favicon.png" />
@@ -36,53 +36,81 @@ const RESERVED = new Set([
   'favicon', 'robots', 'sitemap', 'mapica', 'null', 'undefined',
 ]);
 
+const EXPERTISE_LABELS: Record<string, string> = {
+  hiddenPlaces: 'Hidden places',
+  localFood: 'Food',
+  restaurants: 'Restaurants',
+  architecture: 'Architecture',
+  history: 'History',
+  museums: 'Museums',
+  nature: 'Nature',
+  sea: 'Sea',
+  beaches: 'Beaches',
+  smallTowns: 'Small towns',
+  familyTrips: 'With kids',
+  budgetTrips: 'Budget travel',
+  premiumTrips: 'Premium',
+  nightlife: 'Nightlife',
+  carRoutes: 'Road trips',
+  activeRest: 'Active travel',
+  calmRest: 'Slow travel',
+  art: 'Art',
+  views: 'Viewpoints',
+};
+
 export function isReservedLocalSlug(slug: string): boolean {
-  return RESERVED.has(slug.trim().toLowerCase());
+  const key = slug.trim().toLowerCase().replace(/^@/, '');
+  return RESERVED.has(key);
 }
 
-export function renderLocalNotFound(slug: string, env: SiteEnv = {}): string {
-  const title = 'Local not found';
-  const description =
-    'This Mapica Local page may be unpublished or the link is incorrect.';
-  const url = `${siteUrl(env)}/${encodeURIComponent(slug)}`;
-
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  ${HEAD_META}
-  <title>${escapeHtml(title)} · Mapica</title>
-  <meta name="description" content="${escapeHtml(description)}" />
-  <meta property="og:title" content="${escapeHtml(title)}" />
-  <meta property="og:description" content="${escapeHtml(description)}" />
-  <meta property="og:url" content="${escapeHtml(url)}" />
-  <meta name="robots" content="noindex" />
-  <link rel="stylesheet" href="/styles/local.css" />
-</head>
-<body>
-  <header class="top"><a class="logo" href="/"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a></header>
-  <main class="empty">
-    <p class="kicker">Mapica Local</p>
-    <h1>${escapeHtml(title)}</h1>
-    <p>${escapeHtml(description)}</p>
-    <a class="btn btn-primary" href="${escapeHtml(appStoreUrl(env))}">Get the app</a>
-  </main>
-</body>
-</html>`;
+function countryFlag(countryId: string | null | undefined): string {
+  if (!countryId || countryId.length !== 2) return '';
+  const cc = countryId.toUpperCase();
+  return String.fromCodePoint(
+    ...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
+  );
 }
 
-function locationLabel(preview: LocalPreview): string {
-  const parts = [preview.city, preview.country_name]
-    .map((p) => (p ?? '').trim())
+function expertiseLabels(raw: string[]): string[] {
+  return raw
+    .map((key) => EXPERTISE_LABELS[key] ?? key.replace(/([A-Z])/g, ' $1').trim())
     .filter(Boolean);
-  return parts.join(' · ');
 }
 
-function languageLine(preview: LocalPreview): string {
-  return (preview.languages ?? [])
-    .map((l) => String(l).trim())
-    .filter(Boolean)
-    .join(' · ');
+function taglineFor(preview: LocalPreview): string {
+  const about = (preview.about || '').trim();
+  if (about) {
+    const first = about.split(/(?<=[.!?])\s+/)[0]?.trim();
+    if (first && first.length <= 140) return first;
+    if (about.length <= 140) return about;
+    return `${about.slice(0, 137).trim()}…`;
+  }
+  const city = preview.city?.trim();
+  if (city) {
+    return `Living in ${city} and sharing routes through places I actually love.`;
+  }
+  return 'Routes through places I recommend to friends.';
+}
+
+function bioFor(preview: LocalPreview): string {
+  const about = (preview.about || '').trim();
+  if (about.length > 0) return about;
+  const city = preview.city?.trim() || preview.country_name?.trim() || 'this region';
+  return `Living in ${city} and exploring it beyond the obvious places. I create slow routes through coastal villages, local markets, viewpoints and places I recommend to friends.`;
+}
+
+function regionLine(preview: LocalPreview): string {
+  const regions = (preview.regions ?? []).map((r) => String(r).trim()).filter(Boolean);
+  if (regions.length > 0) return regions.slice(0, 4).join(' · ');
+  return preview.city?.trim() || '';
+}
+
+function statsLine(preview: LocalPreview): string {
+  const routes = `${preview.route_count} route${preview.route_count === 1 ? '' : 's'}`;
+  if (preview.show_travelers && preview.completed_trips > 0) {
+    return `${routes} · ${preview.completed_trips} traveler${preview.completed_trips === 1 ? '' : 's'}`;
+  }
+  return routes;
 }
 
 function routeCard(route: LocalRouteCard): string {
@@ -92,121 +120,182 @@ function routeCard(route: LocalRouteCard): string {
     city: route.city,
   });
   const days = `${route.duration_days} day${route.duration_days === 1 ? '' : 's'}`;
-  const dest = escapeHtml(route.city || route.country || '');
+  const places = route.place_count > 0 ? `${route.place_count} places` : '';
+  const meta = [days, places].filter(Boolean).join(' · ');
+  const subtitle = (route.short_description || route.city || route.country || '').trim();
   const price = `€${Number(route.price_eur).toFixed(0)}`;
-  const href = escapeHtml(route.public_url);
 
-  return `<a class="route" href="${href}">
-    <img src="${escapeHtml(cover)}" alt="" loading="lazy" width="640" height="480" />
-    <span class="route-body">
-      <span class="route-title">${escapeHtml(route.title)}</span>
-      <span class="route-meta">${dest ? `${dest} · ` : ''}${escapeHtml(days)}</span>
-      <span class="route-price">${escapeHtml(price)}</span>
-    </span>
+  return `<a class="route-card" href="${escapeHtml(route.public_url)}">
+    <div class="route-photo"><img src="${escapeHtml(cover)}" alt="" loading="lazy" width="960" height="640" /></div>
+    <div class="route-copy">
+      <h3>${escapeHtml(route.title)}</h3>
+      ${subtitle ? `<p class="route-sub">${escapeHtml(subtitle)}</p>` : ''}
+      <div class="route-foot">
+        <span class="route-meta">${escapeHtml(meta)}</span>
+        <span class="route-price">${escapeHtml(price)}</span>
+      </div>
+      <span class="route-cta">View route →</span>
+    </div>
   </a>`;
 }
 
-export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): string {
-  const site = siteUrl(env);
-  const pageUrl = preview.public_url || `${site}/${encodeURIComponent(preview.slug)}`;
-  const name = preview.display_name;
-  const about = (preview.about || '').trim();
-  const description =
-    about ||
-    preview.og?.description ||
-    `Travel routes by ${name}, a Mapica Local.`;
-  const location = locationLabel(preview);
-  const languages = languageLine(preview);
-  const avatar = preview.avatar_url?.trim() || '';
-  const ogImage = preview.og?.image || avatar || `${site}/images/og.jpg`;
-  const store = appStoreUrl(env);
-  const slugJs = JSON.stringify(preview.slug);
-  const initial = escapeHtml(
-    name.trim() ? name.trim().charAt(0).toUpperCase() : 'L',
-  );
-  const routesHtml =
-    preview.routes?.length > 0
-      ? preview.routes.map(routeCard).join('')
-      : `<p class="empty-routes">No published routes yet. Order a personal trip in the app.</p>`;
-
-  const avatarHtml = avatar
-    ? `<img class="avatar" src="${escapeHtml(avatar)}" alt="" width="88" height="88" />`
-    : `<div class="avatar avatar-fallback" aria-hidden="true">${initial}</div>`;
+export function renderLocalNotFound(slug: string, env: SiteEnv = {}): string {
+  const title = 'Creator not found';
+  const description = 'This Mapica creator page may be unpublished or the link is incorrect.';
+  const url = `${siteUrl(env)}/@${encodeURIComponent(slug.replace(/^@/, ''))}`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   ${HEAD_META}
-  <title>${escapeHtml(name)} · Mapica Local</title>
+  <title>${escapeHtml(title)} · Mapica</title>
   <meta name="description" content="${escapeHtml(description)}" />
-  <meta property="og:title" content="${escapeHtml(preview.og?.title || `${name} · Mapica Local`)}" />
+  <link rel="stylesheet" href="/styles/local.css" />
+</head>
+<body>
+  <header class="top"><a class="logo" href="/"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a></header>
+  <main class="empty">
+    <p class="kicker">Local Creator</p>
+    <h1>${escapeHtml(title)}</h1>
+    <p>${escapeHtml(description)}</p>
+    <a class="btn btn-primary" href="${escapeHtml(appStoreUrl(env))}">Get the app</a>
+  </main>
+</body>
+</html>`;
+}
+
+export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): string {
+  const site = siteUrl(env);
+  const handle = preview.handle || preview.slug.split('-')[0];
+  const pageUrl = preview.public_url || `${site}/@${encodeURIComponent(handle)}`;
+  const name = preview.display_name;
+  const tagline = taglineFor(preview);
+  const bio = bioFor(preview);
+  const description = bio.length > 160 ? `${bio.slice(0, 157)}…` : bio;
+  const avatar = preview.avatar_url?.trim() || '';
+  const ogImage = preview.og?.image || avatar || `${site}/images/og.jpg`;
+  const store = appStoreUrl(env);
+  const slugJs = JSON.stringify(preview.slug);
+  const handleJs = JSON.stringify(handle);
+  const flag = countryFlag(preview.country_id);
+  const locationParts = [
+    preview.city?.trim(),
+    preview.country_name?.trim(),
+  ].filter(Boolean);
+  const location = locationParts.join(' · ');
+  const regions = regionLine(preview);
+  const specs = expertiseLabels(preview.expertise ?? []);
+  const initial = escapeHtml(name.trim() ? name.trim().charAt(0).toUpperCase() : 'L');
+
+  const avatarHtml = avatar
+    ? `<img class="hero-photo" src="${escapeHtml(avatar)}" alt="" width="160" height="160" />`
+    : `<div class="hero-photo hero-photo-fallback" aria-hidden="true">${initial}</div>`;
+
+  const routesHtml =
+    preview.routes?.length > 0
+      ? preview.routes.map(routeCard).join('')
+      : `<p class="empty-routes">No published routes yet. Ask ${escapeHtml(name.split(' ')[0] || name)} for a personal route.</p>`;
+
+  const specsHtml = specs.length
+    ? `<div class="pill-row" aria-label="Specialties">${specs.map((s) => `<span class="pill">${escapeHtml(s)}</span>`).join('')}</div>`
+    : '';
+
+  const ogTitle = preview.og?.title || `${name} · Local Creator`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  ${HEAD_META}
+  <title>${escapeHtml(name)} · Local Creator · Mapica</title>
+  <meta name="description" content="${escapeHtml(description)}" />
+  <meta property="og:title" content="${escapeHtml(ogTitle)}" />
   <meta property="og:description" content="${escapeHtml(preview.og?.description || description)}" />
   <meta property="og:image" content="${escapeHtml(ogImage)}" />
   <meta property="og:url" content="${escapeHtml(pageUrl)}" />
   <meta property="og:type" content="profile" />
   <meta property="og:site_name" content="Mapica" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="${escapeHtml(preview.og?.title || name)}" />
-  <meta name="twitter:description" content="${escapeHtml(preview.og?.description || description)}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${escapeHtml(name)}" />
+  <meta name="twitter:description" content="${escapeHtml(description)}" />
   <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
   <link rel="canonical" href="${escapeHtml(pageUrl)}" />
   <link rel="stylesheet" href="/styles/local.css" />
-  <script type="application/ld+json">
-  ${JSON.stringify({
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name,
-    description,
-    url: pageUrl,
-    image: avatar || undefined,
-    jobTitle: 'Mapica Local',
-    address: location
-      ? { '@type': 'PostalAddress', addressLocality: preview.city, addressCountry: preview.country_name }
-      : undefined,
-  })}
-  </script>
 </head>
 <body>
   <header class="top"><a class="logo" href="/"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a></header>
-  <main class="storefront">
-    <section class="identity">
+  <main class="creator">
+    <section class="hero">
       ${avatarHtml}
-      <p class="kicker">Mapica Local</p>
+      <p class="kicker">Local Creator</p>
       <h1>${escapeHtml(name)}</h1>
-      ${location ? `<p class="location">${escapeHtml(location)}</p>` : ''}
-      ${about ? `<p class="about">${escapeHtml(about)}</p>` : ''}
-      ${languages ? `<p class="langs">${escapeHtml(languages)}</p>` : ''}
-      <p class="stats">${preview.route_count} route${preview.route_count === 1 ? '' : 's'} · ${preview.completed_trips} trip${preview.completed_trips === 1 ? '' : 's'}</p>
-    </section>
-    <section class="routes" aria-labelledby="routes-title">
-      <h2 id="routes-title">Routes</h2>
-      <div class="route-list">
-        ${routesHtml}
+      ${location ? `<p class="hero-location">${escapeHtml(location)}${flag ? ` ${flag}` : ''}</p>` : ''}
+      <p class="tagline">${escapeHtml(tagline)}</p>
+      <div class="trust-row">
+        ${preview.verified ? '<span class="trust">✓ Verified local</span>' : ''}
+        <span class="trust muted">Usually replies within 2h</span>
+      </div>
+      ${regions ? `<p class="regions">📍 ${escapeHtml(regions)}</p>` : ''}
+      <p class="stats">${escapeHtml(statsLine(preview))}</p>
+      <div class="hero-actions">
+        <button type="button" class="btn btn-outline" id="follow-btn">Follow</button>
+        <button type="button" class="btn btn-outline btn-icon" id="save-btn" aria-label="Save">♡</button>
       </div>
     </section>
+
+    <section class="section" aria-labelledby="about-title">
+      <h2 id="about-title">About</h2>
+      <p class="bio">${escapeHtml(bio)}</p>
+      ${specsHtml}
+    </section>
+
+    <section class="section" aria-labelledby="routes-title">
+      <h2 id="routes-title">Routes</h2>
+      <div class="route-grid">${routesHtml}</div>
+    </section>
+
+    <section class="section cta-block" aria-labelledby="trip-title">
+      <h2 id="trip-title">Want something made just for you?</h2>
+      <p class="cta-lede">A personal route created by ${escapeHtml(name.split(' ')[0] || name)} around your dates, interests and travel style.</p>
+      <ul class="checklist">
+        <li>✓ Made by a local</li>
+        <li>✓ Delivered within 24 hours</li>
+        <li>✓ Interactive Mapica route</li>
+        <li>✓ Restaurants &amp; hidden places included</li>
+      </ul>
+      <p class="cta-note">Your local builds the route — they don&apos;t travel with you in person.</p>
+      <p class="cta-price">From €39</p>
+      <button type="button" class="btn btn-primary btn-wide" id="create-trip">Create my personal trip</button>
+      <a class="btn btn-ghost btn-wide" href="${escapeHtml(store)}">Get the app</a>
+    </section>
+
+    <footer class="site-foot">
+      <p class="foot-brand">Mapica</p>
+      <p class="foot-tag">Travel like you know someone there.</p>
+    </footer>
   </main>
-  <div class="dock">
-    <div class="cta">
-      <button type="button" class="btn btn-primary" id="open-app">Order a personal trip</button>
-      <a class="btn btn-ghost" href="${escapeHtml(store)}">Get the app</a>
-    </div>
-  </div>
   <script>
     (function () {
       var slug = ${slugJs};
-      function tryOpenApp(path) {
+      var handle = ${handleJs};
+      var store = ${JSON.stringify(store)};
+      function openApp(path) {
         var deepLink = 'mapica://' + path.replace(/^\\//, '');
         var start = Date.now();
         window.location.href = deepLink;
         setTimeout(function () {
-          if (Date.now() - start < 1600) {
-            window.location.href = ${JSON.stringify(store)};
-          }
+          if (Date.now() - start < 1600) window.location.href = store;
         }, 1200);
       }
-      document.getElementById('open-app')?.addEventListener('click', function () {
-        tryOpenApp('l/' + slug);
+      document.getElementById('create-trip')?.addEventListener('click', function () {
+        openApp('l/' + slug + '?intent=personal-trip');
+      });
+      document.getElementById('follow-btn')?.addEventListener('click', function () {
+        openApp('l/' + slug + '?intent=follow');
+      });
+      document.getElementById('save-btn')?.addEventListener('click', function () {
+        openApp('l/' + slug + '?intent=save');
       });
     })();
   </script>
