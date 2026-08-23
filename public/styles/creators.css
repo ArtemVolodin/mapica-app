@@ -1,8 +1,8 @@
 /* /local — extends home.css; Local-only accent overrides. */
 
 :root {
-  --color-local: #4f969b;
-  --color-local-press: #3f7a80;
+  --color-local: #64c2ca;
+  --color-local-press: #4fadb5;
 }
 
 button.nav-cta {
@@ -13,10 +13,12 @@ button.nav-cta {
 
 .btn-primary {
   background: var(--color-local);
+  color: var(--ink);
 }
 
 .btn-primary:hover {
   background: var(--color-local-press);
+  color: var(--ink);
 }
 
 .btn-primary:focus-visible {

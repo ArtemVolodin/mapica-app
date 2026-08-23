@@ -7,10 +7,10 @@
   --olive: #68735a;
   --accent: #d9684a;
   --accent-press: #c2563c;
-  --color-local: #4f969b;
-  --color-local-press: #3f7a80;
-  --color-sea: #4f969b;
-  --color-sea-press: #3f7a80;
+  --color-local: #64c2ca;
+  --color-local-press: #4fadb5;
+  --color-sea: #64c2ca;
+  --color-sea-press: #4fadb5;
   --white: #ffffff;
   --gutter: clamp(20px, 4vw, 56px);
   --max: 1180px;
