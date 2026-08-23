@@ -4,12 +4,8 @@
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/@:handle/:routeSlug", "destination": "/api/route?slug=:routeSlug" },
-    { "source": "/@:handle", "destination": "/api/local?slug=:handle" },
-    {
-      "source": "/:slug((?!api|styles|images|route|routes|privacy|terms|contact|favicon\\.png|apple-touch-icon\\.png|og-default\\.svg|index\\.html).+)",
-      "destination": "/api/local?slug=:slug"
-    }
+    { "source": "/:slug/:routeSlug", "destination": "/api/route?slug=:routeSlug" },
+    { "source": "/:slug", "destination": "/api/local?slug=:slug" }
   ],
   "headers": [
     {
@@ -41,24 +37,6 @@
     },
     {
       "source": "/route/:slug",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=120, stale-while-revalidate=600"
-        }
-      ]
-    },
-    {
-      "source": "/@:handle",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=60, stale-while-revalidate=300"
-        }
-      ]
-    },
-    {
-      "source": "/@:handle/:routeSlug",
       "headers": [
         {
           "key": "Cache-Control",
