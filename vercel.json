@@ -4,7 +4,6 @@
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/:slug/:routeSlug", "destination": "/api/route?slug=:routeSlug" },
     { "source": "/:slug", "destination": "/api/local?slug=:slug" }
   ],
   "headers": [
