@@ -1,9 +1,30 @@
-/* /local — extends home.css; no new design system. */
+/* /local — extends home.css; Local-only accent overrides. */
+
+:root {
+  --color-local: #377f79;
+  --color-local-press: #2f6b66;
+}
 
 button.nav-cta {
   border: 0;
   cursor: pointer;
   font: inherit;
+}
+
+.btn-primary {
+  background: var(--color-local);
+}
+
+.btn-primary:hover {
+  background: var(--color-local-press);
+}
+
+.btn-primary:focus-visible {
+  outline-color: var(--color-local);
+}
+
+.card .tag {
+  color: var(--color-local);
 }
 
 .local-hero {
@@ -21,7 +42,7 @@ button.nav-cta {
   height: 32px;
   margin-bottom: 14px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-local);
   color: var(--white);
   font-size: 13px;
   font-weight: 700;
@@ -92,7 +113,7 @@ button.nav-cta {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--color-local);
   color: var(--white);
   display: grid;
   place-items: center;
@@ -130,7 +151,7 @@ button.nav-cta {
   display: grid;
   place-items: center;
   background: var(--sand);
-  color: var(--accent);
+  color: var(--color-local);
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -144,7 +165,7 @@ button.nav-cta {
   font-weight: 650;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--color-local);
 }
 
 .ui-name {
@@ -351,33 +372,20 @@ button.nav-cta {
   font-size: 15px;
 }
 
-#money-split-note {
-  max-width: 42em;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.5;
-  font-size: 14px;
+.local-price-line {
+  margin: 12px 0 0;
 }
 
-.local-money-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.local-money-split div {
-  padding: 12px;
-  border-radius: 14px;
-  background: var(--paper);
-  font-size: 14px;
-}
-
-.local-money-split strong {
-  display: block;
-  margin-top: 4px;
-  font-size: 18px;
+.local-price-line strong {
+  font-size: 22px;
   letter-spacing: -0.03em;
+}
+
+.local-price-support {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .local-founding {
@@ -423,7 +431,7 @@ button.nav-cta {
   content: "✓";
   position: absolute;
   left: 0;
-  color: var(--accent);
+  color: var(--color-local);
   font-weight: 700;
 }
 
@@ -586,7 +594,7 @@ button.nav-cta {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--color-local);
 }
 
 .local-modal h2 {

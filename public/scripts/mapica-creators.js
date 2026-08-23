@@ -1,5 +1,5 @@
 (function () {
-  // Mirrors lib/core/services/trip_pricing_service.dart
+  // Commission logic lives in the app only — not shown on this page.
   var CONFIG = {
     // private_beta | app_store
     distribution: 'private_beta',
@@ -7,9 +7,6 @@
     appStore: 'https://apps.apple.com/app/mapica',
     contactUrl: '/contact.html',
     exampleProfile: 'https://mapica.app/@artem',
-    routeCommissionRate: 0.2,
-    personalTrip: { price: 39, localPayout: 30, mapicaRevenue: 9 },
-    routeExamplePrice: 12,
     freeToJoin: true,
     applyPath: '/local/apply',
   };
@@ -31,44 +28,6 @@
 
   function isIOS() {
     return /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-  }
-
-  function formatMoney(n) {
-    return '€' + n.toFixed(2).replace(/\.00$/, '');
-  }
-
-  function routeSplit(price) {
-    var mapica = price * CONFIG.routeCommissionRate;
-    return { local: price - mapica, mapica: mapica };
-  }
-
-  function paintMoneyExamples() {
-    var route = routeSplit(CONFIG.routeExamplePrice);
-    var routePrice = document.getElementById('money-route-price');
-    var routeLocal = document.getElementById('money-route-local');
-    var routeMapica = document.getElementById('money-route-mapica');
-    if (routePrice) routePrice.textContent = formatMoney(CONFIG.routeExamplePrice);
-    if (routeLocal) routeLocal.textContent = formatMoney(route.local);
-    if (routeMapica) routeMapica.textContent = formatMoney(route.mapica);
-
-    var pt = CONFIG.personalTrip;
-    var tripPrice = document.getElementById('money-trip-price');
-    var tripLocal = document.getElementById('money-trip-local');
-    var tripMapica = document.getElementById('money-trip-mapica');
-    if (tripPrice) tripPrice.textContent = formatMoney(pt.price);
-    if (tripLocal) tripLocal.textContent = formatMoney(pt.localPayout);
-    if (tripMapica) tripMapica.textContent = formatMoney(pt.mapicaRevenue);
-
-    var note = document.getElementById('money-split-note');
-    if (note) {
-      var pct = Math.round((pt.localPayout / pt.price) * 100);
-      note.textContent =
-        'Ready routes: 80% yours. Personal trips use Mapica’s base trip pricing — about ' +
-        pct +
-        '% yours on the starter €' +
-        pt.price +
-        ' trip.';
-    }
   }
 
   var modalRoot = null;
@@ -245,7 +204,6 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  paintMoneyExamples();
   wireCtas();
   wireFaq();
   wireNav();
