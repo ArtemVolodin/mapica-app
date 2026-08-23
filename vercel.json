@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/route/:slug", "destination": "/api/route?slug=:slug" },
+    { "source": "/@:handle/:routeSlug", "destination": "/api/route?slug=:routeSlug" },
     { "source": "/local", "destination": "/creators.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
