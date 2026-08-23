@@ -9,7 +9,20 @@ export type LocalRouteCard = {
   country: string | null;
   duration_days: number;
   place_count: number;
+  saves_count: number;
+  route_rating: number | null;
+  route_reviews_count: number;
   public_url: string;
+};
+
+export type CreatorReview = {
+  id: string;
+  rating: number;
+  review_text: string;
+  author_name: string;
+  author_city: string | null;
+  author_country: string | null;
+  created_at: string;
 };
 
 export type LocalPreviewOg = {
@@ -22,6 +35,7 @@ export type LocalPreviewOg = {
 
 export type LocalPreview = {
   id: string;
+  creator_id: string;
   slug: string;
   handle: string;
   display_name: string;
@@ -33,11 +47,19 @@ export type LocalPreview = {
   languages: string[];
   regions: string[];
   expertise: string[];
+  instagram_url: string | null;
+  instagram_username: string | null;
+  followers_count: number;
+  is_following: boolean;
   completed_trips: number;
   show_travelers: boolean;
-  rating: number;
+  creator_rating: number | null;
+  reviews_count: number;
+  show_rating: boolean;
+  total_saves: number;
   route_count: number;
   routes: LocalRouteCard[];
+  reviews: CreatorReview[];
   public_url: string;
   verified: boolean;
   og: LocalPreviewOg;

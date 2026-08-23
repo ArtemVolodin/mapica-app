@@ -1,5 +1,5 @@
 import type { SiteEnv } from './env';
-import type { LocalPreview, LocalRouteCard } from './types';
+import type { CreatorReview, LocalPreview, LocalRouteCard } from './types';
 import { coverUrl } from './cover';
 
 function escapeHtml(value: string): string {
@@ -106,11 +106,34 @@ function regionLine(preview: LocalPreview): string {
 }
 
 function statsLine(preview: LocalPreview): string {
-  const routes = `${preview.route_count} route${preview.route_count === 1 ? '' : 's'}`;
-  if (preview.show_travelers && preview.completed_trips > 0) {
-    return `${routes} · ${preview.completed_trips} traveler${preview.completed_trips === 1 ? '' : 's'}`;
+  const parts: string[] = [];
+  parts.push(`${preview.route_count} route${preview.route_count === 1 ? '' : 's'}`);
+  if (preview.followers_count > 0) {
+    parts.push(`${preview.followers_count} follower${preview.followers_count === 1 ? '' : 's'}`);
   }
-  return routes;
+  if (preview.show_travelers && preview.completed_trips > 0) {
+    parts.push(`${preview.completed_trips} traveler${preview.completed_trips === 1 ? '' : 's'}`);
+  }
+  return parts.join(' · ');
+}
+
+function stars(rating: number): string {
+  const full = Math.max(1, Math.min(5, Math.round(rating)));
+  return '★'.repeat(full) + '☆'.repeat(5 - full);
+}
+
+function reviewByline(review: { author_name: string; author_city: string | null }): string {
+  const name = review.author_name.trim() || 'Traveler';
+  const city = review.author_city?.trim();
+  return city ? `${name} · ${city}` : name;
+}
+
+function reviewCard(review: CreatorReview): string {
+  return `<article class="review-card">
+    <p class="review-stars" aria-label="${escapeHtml(String(review.rating))} out of 5">${stars(review.rating)}</p>
+    <blockquote class="review-text">"${escapeHtml(review.review_text)}"</blockquote>
+    <p class="review-byline">${escapeHtml(reviewByline(review))}</p>
+  </article>`;
 }
 
 function routeCard(route: LocalRouteCard): string {
@@ -121,7 +144,11 @@ function routeCard(route: LocalRouteCard): string {
   });
   const days = `${route.duration_days} day${route.duration_days === 1 ? '' : 's'}`;
   const places = route.place_count > 0 ? `${route.place_count} places` : '';
-  const meta = [days, places].filter(Boolean).join(' · ');
+  const metaParts = [days, places].filter(Boolean);
+  if (route.route_reviews_count > 0 && route.route_rating != null) {
+    metaParts.push(`★ ${Number(route.route_rating).toFixed(1)}`);
+  }
+  const meta = metaParts.join(' · ');
   const subtitle = (route.short_description || route.city || route.country || '').trim();
   const price = `€${Number(route.price_eur).toFixed(0)}`;
 
@@ -178,6 +205,21 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
   const store = appStoreUrl(env);
   const slugJs = JSON.stringify(preview.slug);
   const handleJs = JSON.stringify(handle);
+  const creatorIdJs = JSON.stringify(preview.creator_id);
+  const followLabel = preview.is_following ? 'Following' : 'Follow';
+  const followClass = preview.is_following ? 'btn btn-outline is-following' : 'btn btn-outline';
+  const ratingHtml =
+    preview.show_rating && preview.creator_rating != null
+      ? `<p class="creator-rating">★ ${Number(preview.creator_rating).toFixed(1)} · ${preview.reviews_count} review${preview.reviews_count === 1 ? '' : 's'}</p>`
+      : '';
+  const instagram = preview.instagram_url?.trim();
+  const instagramHtml = instagram
+    ? `<a class="trust link" href="${escapeHtml(instagram)}" target="_blank" rel="noopener noreferrer">Instagram ↗</a>`
+    : '';
+  const reviewsHtml =
+    preview.reviews?.length > 0
+      ? preview.reviews.map(reviewCard).join('')
+      : '';
   const flag = countryFlag(preview.country_id);
   const locationParts = [
     preview.city?.trim(),
@@ -234,12 +276,13 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
       <p class="tagline">${escapeHtml(tagline)}</p>
       <div class="trust-row">
         ${preview.verified ? '<span class="trust">✓ Verified local</span>' : ''}
-        <span class="trust muted">Usually replies within 2h</span>
+        ${instagramHtml}
       </div>
+      ${ratingHtml}
       ${regions ? `<p class="regions">📍 ${escapeHtml(regions)}</p>` : ''}
       <p class="stats">${escapeHtml(statsLine(preview))}</p>
       <div class="hero-actions">
-        <button type="button" class="btn btn-outline" id="follow-btn">Follow</button>
+        <button type="button" class="${followClass}" id="follow-btn" data-following="${preview.is_following ? '1' : '0'}">${escapeHtml(followLabel)}</button>
         <button type="button" class="btn btn-outline btn-icon" id="save-btn" aria-label="Save">♡</button>
       </div>
     </section>
@@ -254,6 +297,11 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
       <h2 id="routes-title">Routes</h2>
       <div class="route-grid">${routesHtml}</div>
     </section>
+
+    ${reviewsHtml ? `<section class="section" aria-labelledby="reviews-title">
+      <h2 id="reviews-title">What travelers say</h2>
+      <div class="review-grid">${reviewsHtml}</div>
+    </section>` : ''}
 
     <section class="section cta-block" aria-labelledby="trip-title">
       <h2 id="trip-title">Want something made just for you?</h2>
@@ -279,7 +327,11 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
     (function () {
       var slug = ${slugJs};
       var handle = ${handleJs};
+      var creatorId = ${creatorIdJs};
       var store = ${JSON.stringify(store)};
+      var supabaseUrl = ${JSON.stringify(env.SUPABASE_URL ?? 'https://qsstbssltuzglvtrpkvh.supabase.co')};
+      var supabaseAnon = ${JSON.stringify(env.SUPABASE_ANON_KEY ?? '')};
+
       function openApp(path) {
         var deepLink = 'mapica://' + path.replace(/^\\//, '');
         var start = Date.now();
@@ -288,12 +340,76 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
           if (Date.now() - start < 1600) window.location.href = store;
         }, 1200);
       }
+
+      function authToken() {
+        if (!supabaseAnon || !window.localStorage) return null;
+        var prefix = 'sb-' + supabaseUrl.replace(/^https?:\\/\\//, '').split('.')[0];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i) || '';
+          if (key.indexOf('auth-token') >= 0) {
+            try {
+              var raw = JSON.parse(localStorage.getItem(key) || '{}');
+              return raw.access_token || raw.currentSession?.access_token || null;
+            } catch (_) {}
+          }
+        }
+        return null;
+      }
+
+      function setFollowState(following, followersCount) {
+        var btn = document.getElementById('follow-btn');
+        if (!btn) return;
+        btn.textContent = following ? 'Following' : 'Follow';
+        btn.classList.toggle('is-following', !!following);
+        btn.setAttribute('data-following', following ? '1' : '0');
+        if (typeof followersCount === 'number') {
+          var stats = document.querySelector('.stats');
+          if (!stats) return;
+          var parts = stats.textContent.split(' · ').filter(function (p) {
+            return p.indexOf('follower') < 0;
+          });
+          if (followersCount > 0) {
+            parts.splice(1, 0, followersCount + ' follower' + (followersCount === 1 ? '' : 's'));
+          }
+          stats.textContent = parts.join(' · ');
+        }
+      }
+
       document.getElementById('create-trip')?.addEventListener('click', function () {
         openApp('l/' + slug + '?intent=personal-trip');
       });
+
       document.getElementById('follow-btn')?.addEventListener('click', function () {
-        openApp('l/' + slug + '?intent=follow');
+        var token = authToken();
+        if (!token) {
+          openApp('l/' + slug + '?intent=follow');
+          return;
+        }
+        fetch('/api/follow', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token,
+          },
+          body: JSON.stringify({ creator_id: creatorId }),
+        })
+          .then(function (res) {
+            if (res.status === 401) {
+              openApp('l/' + slug + '?intent=follow');
+              return null;
+            }
+            return res.json();
+          })
+          .then(function (data) {
+            if (data && typeof data.following === 'boolean') {
+              setFollowState(data.following, data.followers_count);
+            }
+          })
+          .catch(function () {
+            openApp('l/' + slug + '?intent=follow');
+          });
       });
+
       document.getElementById('save-btn')?.addEventListener('click', function () {
         openApp('l/' + slug + '?intent=save');
       });

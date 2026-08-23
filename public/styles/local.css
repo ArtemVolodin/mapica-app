@@ -319,6 +319,63 @@ body {
   letter-spacing: -0.03em;
 }
 
+.creator-rating {
+  margin: 10px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.trust.link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.trust.link:hover {
+  text-decoration: underline;
+}
+
+.btn.is-following {
+  background: var(--wash);
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.review-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.review-card {
+  margin: 0;
+  padding: 18px 16px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 0.5px solid var(--line);
+}
+
+.review-stars {
+  margin: 0 0 10px;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: #c99200;
+}
+
+.review-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-style: normal;
+  color: var(--ink);
+}
+
+.review-byline {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
 .site-foot {
   text-align: center;
   padding: 28px 0 8px;
