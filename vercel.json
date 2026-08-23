@@ -1,7 +1,7 @@
 {
   "rewrites": [
     { "source": "/route/:slug", "destination": "/api/route?slug=:slug" },
-    { "source": "/local", "destination": "/for-locals.html" },
+    { "source": "/local", "destination": "/local/index.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/contact", "destination": "/contact.html" },
