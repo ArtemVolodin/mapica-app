@@ -7,6 +7,8 @@
   --olive: #68735a;
   --accent: #d9684a;
   --accent-press: #c2563c;
+  --color-local: #377f79;
+  --color-local-press: #2f6b66;
   --white: #ffffff;
   --gutter: clamp(20px, 4vw, 56px);
   --max: 1180px;
@@ -117,6 +119,22 @@ a {
 .nav-link:hover,
 .nav-link[aria-current="page"] {
   color: var(--ink);
+}
+
+.nav-link-local {
+  color: var(--color-local);
+}
+
+.nav-link-local:hover {
+  color: var(--color-local-press);
+}
+
+.nav-link-traveler {
+  color: var(--accent);
+}
+
+.nav-link-traveler:hover {
+  color: var(--accent-press);
 }
 
 .nav-cta {
