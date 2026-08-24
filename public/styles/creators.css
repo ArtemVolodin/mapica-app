@@ -346,6 +346,15 @@ button.nav-cta {
   font-size: 12px;
 }
 
+.local-step-card > .local-earn-demo-note {
+  flex: none;
+  margin: 12px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
 .local-people {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -368,10 +377,74 @@ button.nav-cta {
 }
 
 .local-money-note {
-  margin: 18px 0 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  gap: 0;
+  max-width: 780px;
+  width: 100%;
+  margin: 22px auto 0;
+  padding: 4px 0;
+  background: color-mix(in srgb, var(--color-local) 8%, var(--paper));
+  border-radius: 20px;
+}
+
+.local-money-note li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  position: relative;
+  padding: 18px 16px;
+}
+
+.local-money-note li + li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 0.5px;
+  background: var(--line);
+}
+
+.local-money-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--color-local);
+}
+
+.local-money-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.local-money-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.local-money-note strong {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.local-money-copy > span {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
   color: var(--muted);
-  font-size: 15px;
 }
 
 .local-price-line {
@@ -623,6 +696,39 @@ button.nav-cta {
 }
 
 @media (max-width: 860px) {
+  .local-money-note {
+    grid-template-columns: 1fr;
+    max-width: none;
+    padding: 4px 0;
+  }
+
+  .local-money-note li {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 12px;
+    padding: 14px 18px;
+  }
+
+  .local-money-note li + li::before {
+    top: 0;
+    right: 20px;
+    left: 20px;
+    bottom: auto;
+    width: auto;
+    height: 0.5px;
+  }
+
+  .local-money-icon {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .local-money-copy {
+    align-items: flex-start;
+  }
+
   .local-people {
     grid-template-columns: 1fr 1fr;
   }
