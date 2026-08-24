@@ -376,6 +376,15 @@ button.nav-cta {
   grid-column: span 2;
 }
 
+.local-offer {
+  display: grid;
+  justify-items: center;
+}
+
+.local-offer .grid-2 {
+  width: 100%;
+}
+
 .local-money-note {
   list-style: none;
   display: grid;
@@ -384,8 +393,9 @@ button.nav-cta {
   gap: 0;
   max-width: 640px;
   width: 100%;
-  margin: 16px auto 0;
+  margin: 16px 0 0;
   padding: 0;
+  justify-self: center;
   background: color-mix(in srgb, var(--color-local) 7%, var(--paper));
   border-radius: 14px;
 }
