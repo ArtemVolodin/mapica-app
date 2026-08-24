@@ -3,6 +3,8 @@
     { "source": "/route/:slug", "destination": "/api/route?slug=:slug" },
     { "source": "/@:handle/:routeSlug", "destination": "/api/route?slug=:routeSlug" },
     { "source": "/local", "destination": "/creators.html" },
+    { "source": "/local/apply", "destination": "/open-app.html" },
+    { "source": "/staff/local", "destination": "/api/staff-local" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/contact", "destination": "/contact.html" },

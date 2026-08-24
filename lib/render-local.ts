@@ -33,7 +33,7 @@ const RESERVED = new Set([
   'local', 'locals', 'api', 'images', 'styles', 'home', 'trip', 'trips',
   'profile', 'auth', 'login', 'welcome', 'notifications', 'l', 'index',
   'assets', 'static', 'www', 'admin', 'support', 'about', 'blog', 'help',
-  'favicon', 'robots', 'sitemap', 'mapica', 'null', 'undefined',
+  'favicon', 'robots', 'sitemap', 'mapica', 'null', 'undefined', 'staff',
 ]);
 
 const EXPERTISE_LABELS: Record<string, string> = {
@@ -207,7 +207,7 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
   const handleJs = JSON.stringify(handle);
   const creatorIdJs = JSON.stringify(preview.creator_id);
   const followLabel = preview.is_following ? 'Following' : 'Follow';
-  const followClass = preview.is_following ? 'btn btn-outline is-following' : 'btn btn-outline';
+  const followClass = preview.is_following ? 'btn btn-outline is-following' : 'btn btn-primary';
   const ratingHtml =
     preview.show_rating && preview.creator_rating != null
       ? `<p class="creator-rating">★ ${Number(preview.creator_rating).toFixed(1)} · ${preview.reviews_count} review${preview.reviews_count === 1 ? '' : 's'}</p>`
@@ -361,6 +361,8 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
         if (!btn) return;
         btn.textContent = following ? 'Following' : 'Follow';
         btn.classList.toggle('is-following', !!following);
+        btn.classList.toggle('btn-primary', !following);
+        btn.classList.toggle('btn-outline', !!following);
         btn.setAttribute('data-following', following ? '1' : '0');
         if (typeof followersCount === 'number') {
           var stats = document.querySelector('.stats');
