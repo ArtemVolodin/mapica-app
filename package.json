@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Public landing pages for mapica.app/route/:slug",
   "scripts": {
+    "dev": "node scripts/dev-server.mjs",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
