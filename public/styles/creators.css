@@ -380,31 +380,33 @@ button.nav-cta {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  align-items: start;
+  align-items: center;
   gap: 0;
-  max-width: 780px;
+  max-width: 640px;
   width: 100%;
-  margin: 22px auto 0;
-  padding: 4px 0;
-  background: color-mix(in srgb, var(--color-local) 8%, var(--paper));
-  border-radius: 20px;
+  margin: 16px auto 0;
+  padding: 0;
+  background: color-mix(in srgb, var(--color-local) 7%, var(--paper));
+  border-radius: 14px;
 }
 
 .local-money-note li {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: left;
   position: relative;
-  padding: 18px 16px;
+  padding: 10px 12px;
 }
 
 .local-money-note li + li::before {
   content: "";
   position: absolute;
   left: 0;
-  top: 16px;
-  bottom: 16px;
+  top: 10px;
+  bottom: 10px;
   width: 0.5px;
   background: var(--line);
 }
@@ -412,38 +414,39 @@ button.nav-cta {
 .local-money-icon {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  margin-bottom: 10px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--white);
   color: var(--color-local);
 }
 
 .local-money-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   display: block;
 }
 
 .local-money-copy {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  min-width: 0;
 }
 
 .local-money-note strong {
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 13px;
+  font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--ink);
 }
 
 .local-money-copy > span {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: 1px;
+  font-size: 11px;
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--muted);
 }
 
@@ -699,34 +702,20 @@ button.nav-cta {
   .local-money-note {
     grid-template-columns: 1fr;
     max-width: none;
-    padding: 4px 0;
   }
 
   .local-money-note li {
-    flex-direction: row;
-    align-items: center;
     justify-content: flex-start;
-    text-align: left;
-    gap: 12px;
-    padding: 14px 18px;
+    padding: 10px 14px;
   }
 
   .local-money-note li + li::before {
     top: 0;
-    right: 20px;
-    left: 20px;
+    right: 16px;
+    left: 16px;
     bottom: auto;
     width: auto;
     height: 0.5px;
-  }
-
-  .local-money-icon {
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-
-  .local-money-copy {
-    align-items: flex-start;
   }
 
   .local-people {
