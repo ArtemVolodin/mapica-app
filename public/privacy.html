@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#faf8f3" />
   <title>Privacy Policy — Mapica</title>
-  <meta name="description" content="How Mapica collects, uses, and shares information in the travel app and on mapica.app." />
+  <meta name="description" content="How Mapica collects, uses, stores, and shares personal data in the app, on mapica.app, and related services." />
   <link rel="canonical" href="https://mapica.app/privacy.html" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
@@ -17,46 +17,335 @@
   </header>
   <main class="legal">
     <h1>Privacy Policy</h1>
-    <p class="meta">Last updated: 19 August 2026 · Mapica · <a href="https://mapica.app">mapica.app</a></p>
+    <p class="meta">Last updated: 24 August 2026 · Mapica · <a href="https://mapica.app">mapica.app</a></p>
 
-    <p>This policy explains how Mapica (“we”) handles information when you use the Mapica iOS app and this website. Tickets, hotels, and car rentals are booked with independent partners; their own policies apply once you leave Mapica for checkout.</p>
+    <p>This Privacy Policy explains how Mapica collects, uses, stores, and shares personal data when you use the Mapica app, <a href="https://mapica.app">mapica.app</a>, public Local Creator and route pages, and related Mapica services.</p>
+    <p>Mapica helps travelers receive personalized travel plans and routes from Local Creators. Tickets, accommodation, car rentals, and certain other travel services may be provided by independent partners. Once you leave Mapica and continue to a partner website or checkout, that partner’s own privacy policy also applies.</p>
 
     <h2>Who we are</h2>
-    <p>Mapica is a travel product: locals plan itineraries, and travelers follow them in the app. Contact: <a href="mailto:hello@mapica.app">hello@mapica.app</a> · Support: <a href="mailto:support@mapica.app">support@mapica.app</a>.</p>
+    <p>The controller responsible for your personal data operates under the <strong>Mapica</strong> brand.</p>
+    <ul>
+      <li><strong>Website.</strong> <a href="https://mapica.app">https://mapica.app</a></li>
+      <li><strong>Privacy.</strong> <a href="mailto:privacy@mapica.app">privacy@mapica.app</a></li>
+      <li><strong>Support.</strong> <a href="mailto:support@mapica.app">support@mapica.app</a></li>
+    </ul>
+    <p>For requests relating to your personal data or privacy rights, contact <a href="mailto:privacy@mapica.app">privacy@mapica.app</a>.</p>
 
     <h2>Information we collect</h2>
+    <p>The information we process depends on how you use Mapica.</p>
+
+    <p><strong>Account and authentication</strong></p>
+    <p>We may process:</p>
     <ul>
-      <li><strong>Account.</strong> Email, sign-in identifiers (Apple, Google), and profile details you choose to add (name, photo, city).</li>
-      <li><strong>Trips.</strong> Destinations, dates, preferences, itineraries, messages with Locals, and photos you upload (for example a route cover).</li>
-      <li><strong>Location.</strong> If you allow it, we use location to show walking directions and nearby context. You can refuse or turn it off in iOS Settings.</li>
-      <li><strong>Device and usage.</strong> App version, language, crash logs, and basic analytics needed to run the service.</li>
-      <li><strong>Payments for Mapica routes.</strong> If you buy a public route in Mapica, payment is processed by our payment provider. We do not store full card numbers.</li>
+      <li>your email address;</li>
+      <li>your Mapica account identifier;</li>
+      <li>identifiers received when you sign in with Apple or Google;</li>
+      <li>your name or display name;</li>
+      <li>interface language;</li>
+      <li>authentication and session information.</li>
+    </ul>
+    <p>Passwords are handled through Supabase Auth and are not stored as plain-text passwords in the Mapica profile database.</p>
+
+    <p><strong>Profile information</strong></p>
+    <p>You may choose to provide:</p>
+    <ul>
+      <li>your name;</li>
+      <li>profile photo or avatar;</li>
+      <li>city and country;</li>
+      <li>date of birth where needed for age eligibility or a relevant feature;</li>
+      <li>language;</li>
+      <li>notification preferences;</li>
+      <li>other optional profile information.</li>
+    </ul>
+    <p>Where a full date of birth is not necessary for a feature, Mapica aims not to use it more broadly than necessary.</p>
+
+    <p><strong>Trip information</strong></p>
+    <p>When you create a trip, we may process:</p>
+    <ul>
+      <li>destinations;</li>
+      <li>travel dates;</li>
+      <li>number and type of travelers;</li>
+      <li>whether children are traveling and their age group;</li>
+      <li>interests;</li>
+      <li>preferred pace;</li>
+      <li>budget;</li>
+      <li>accommodation preferences;</li>
+      <li>car availability;</li>
+      <li>ticket and transport preferences;</li>
+      <li>messages or special requests you choose to provide;</li>
+      <li>itinerary and route information;</li>
+      <li>places associated with your trip;</li>
+      <li>interaction with your trip.</li>
+    </ul>
+    <p>Please do not include sensitive personal information in free-text fields unless it is genuinely necessary for your trip.</p>
+
+    <p><strong>Messages and uploaded content</strong></p>
+    <p>We may process:</p>
+    <ul>
+      <li>messages with a Local Creator;</li>
+      <li>messages sent through Mapica chat;</li>
+      <li>photos and images you choose to upload;</li>
+      <li>route cover images;</li>
+      <li>routes, places, and descriptions you create;</li>
+      <li>reviews and other user-generated content.</li>
     </ul>
 
-    <h2>How we use it</h2>
-    <p>We use this information to create and deliver trips, match you with Locals, operate the marketplace, improve the product, prevent abuse, and contact you about your bookings and account.</p>
+    <p><strong>Local applications</strong></p>
+    <p>If you apply to become a Local Creator, we may also process:</p>
+    <ul>
+      <li>your name;</li>
+      <li>country and city;</li>
+      <li>languages;</li>
+      <li>your “about” information;</li>
+      <li>areas or regions you know;</li>
+      <li>expertise categories;</li>
+      <li>a sample mini-route;</li>
+      <li>application status;</li>
+      <li>communications concerning your application.</li>
+    </ul>
+    <p>Local applications are reviewed by authorized Mapica staff. Approval or rejection of a Local application is not based solely on automated decision-making.</p>
 
-    <h2>Partners and tickets</h2>
-    <p>When you tap Buy ticket, Book, or Rent a car, Mapica opens a partner site or checkout (for example Tiqets, Viator, Expedia, DiscoverCars). Those companies receive the information needed for that booking (such as the attraction, dates, and city). They are independent controllers for that purchase. Mapica does not process ticket, hotel, or car-rental payments.</p>
-    <p>We also use infrastructure providers (hosting, maps, authentication, email) as processors under contract.</p>
+    <p><strong>Public Local profiles</strong></p>
+    <p>Once a Local is approved, certain information may become publicly available, including:</p>
+    <ul>
+      <li>public name;</li>
+      <li>profile photo;</li>
+      <li>city or region;</li>
+      <li>languages;</li>
+      <li>about information;</li>
+      <li>expertise;</li>
+      <li>published routes;</li>
+      <li>public ratings or metrics where those features are enabled.</li>
+    </ul>
+    <p>Your email address and date of birth are not displayed in the public Local profile.</p>
 
-    <h2>Sharing</h2>
-    <p>We share trip details with the Local assigned to your request. We do not sell personal data. We may disclose information if required by law or to protect users and the service.</p>
+    <p><strong>Location</strong></p>
+    <p>If you give permission, Mapica may process precise or approximate device location in order to:</p>
+    <ul>
+      <li>show your position on the map;</li>
+      <li>calculate routes;</li>
+      <li>provide walking navigation;</li>
+      <li>show nearby places;</li>
+      <li>provide features that directly depend on your location.</li>
+    </ul>
+    <p>Mapica requests location access through the operating system permission controls. You can refuse or withdraw location permission through your device settings. Some map-related features may work less effectively without location access.</p>
 
-    <h2>Retention</h2>
-    <p>We keep account and trip data while your account is active and as needed for legal, tax, or dispute reasons. You can ask us to delete your account by emailing <a href="mailto:support@mapica.app">support@mapica.app</a>.</p>
+    <p><strong>Device and technical information</strong></p>
+    <p>We may process:</p>
+    <ul>
+      <li>IP address;</li>
+      <li>device type;</li>
+      <li>operating system;</li>
+      <li>app version;</li>
+      <li>device language;</li>
+      <li>technical identifiers;</li>
+      <li>Firebase Cloud Messaging registration token for push notifications;</li>
+      <li>error and crash information;</li>
+      <li>server logs;</li>
+      <li>security and abuse-prevention information.</li>
+    </ul>
 
-    <h2>Your rights</h2>
-    <p>Depending on where you live (including the EEA/UK), you may request access, correction, deletion, restriction, or a copy of your data, and object to certain processing. You may also lodge a complaint with your local data protection authority.</p>
+    <p><strong>Payments</strong></p>
+    <p>When you purchase a Mapica route or another service sold directly by Mapica, we may process:</p>
+    <ul>
+      <li>transaction identifier;</li>
+      <li>amount;</li>
+      <li>currency;</li>
+      <li>payment status;</li>
+      <li>the product purchased;</li>
+      <li>information necessary for accounting or dispute handling.</li>
+    </ul>
+    <p>Payments are processed by <strong>Stripe</strong>. Mapica does not store full payment card numbers.</p>
+    <p>Stripe may act as our processor for certain payment activities and as an independent controller for certain processing it performs for its own legal, regulatory, fraud-prevention, or service purposes.</p>
+
+    <h2>Where the information comes from</h2>
+    <p>Most information is provided directly by you.</p>
+    <p>We may also receive limited information:</p>
+    <ul>
+      <li>from Apple or Google when you use social sign-in;</li>
+      <li>from Stripe regarding payment status;</li>
+      <li>from your device when you grant permissions;</li>
+      <li>from the Local Creator involved in your trip;</li>
+      <li>from our infrastructure and security providers;</li>
+      <li>from publicly available sources where necessary for a feature about which you have been informed.</li>
+    </ul>
+
+    <h2>Why we use your information and our legal bases</h2>
+    <p>Under the GDPR, we process personal data only where we have an appropriate legal basis.</p>
+
+    <p><strong>Performance of a contract or steps before entering into a contract</strong></p>
+    <p>We process information where necessary to:</p>
+    <ul>
+      <li>create and manage your account;</li>
+      <li>create a trip;</li>
+      <li>send a trip request to a Local Creator;</li>
+      <li>prepare and deliver an itinerary;</li>
+      <li>operate the Mapica marketplace;</li>
+      <li>process a Mapica purchase;</li>
+      <li>provide a paid service;</li>
+      <li>provide customer support.</li>
+    </ul>
+    <p>Legal basis: Article 6(1)(b) GDPR.</p>
+
+    <p><strong>Consent</strong></p>
+    <p>We may rely on consent for:</p>
+    <ul>
+      <li>access to precise location where consent is required;</li>
+      <li>optional analytics or tracking technologies;</li>
+      <li>marketing communications where consent is required by law;</li>
+      <li>optional device permissions or features.</li>
+    </ul>
+    <p>Legal basis: Article 6(1)(a) GDPR.</p>
+    <p>You can withdraw consent at any time. Withdrawal does not affect processing that was lawful before consent was withdrawn.</p>
+
+    <p><strong>Mapica’s legitimate interests</strong></p>
+    <p>We may process limited information where necessary for legitimate interests such as:</p>
+    <ul>
+      <li>protecting accounts;</li>
+      <li>preventing fraud and abuse;</li>
+      <li>maintaining service security;</li>
+      <li>technical diagnostics;</li>
+      <li>improving product reliability;</li>
+      <li>marketplace moderation;</li>
+      <li>reviewing Local applications;</li>
+      <li>establishing, exercising, or defending legal claims.</li>
+    </ul>
+    <p>Legal basis: Article 6(1)(f) GDPR. We do not rely on this basis where your rights and interests override our interests.</p>
+
+    <p><strong>Legal obligations</strong></p>
+    <p>Certain payment, accounting, tax, or dispute-related information may be processed or retained where necessary to comply with applicable law. Legal basis: Article 6(1)(c) GDPR.</p>
+
+    <h2>Who we share information with</h2>
+    <p>We do not sell your personal data. We share personal data only with recipients that need it for the relevant purpose. Third parties with whom we share data are expected to provide the same or equal protection of user data as stated in this Privacy Policy.</p>
+
+    <p><strong>Local Creators</strong></p>
+    <p>When you request a personalized trip, the assigned Local Creator receives the information reasonably necessary to prepare your trip, which may include destination, dates, travel party, interests, pace, budget, travel preferences, and your message to the Local. We aim not to disclose information that is unnecessary for fulfilling the request.</p>
+
+    <p><strong>Supabase</strong></p>
+    <p>We use Supabase for Authentication, PostgreSQL database, Storage, Realtime, Edge Functions, and backend infrastructure. Supabase processes information to provide these services to Mapica.</p>
+
+    <p><strong>Stripe</strong></p>
+    <p>Stripe provides payment processing and related fraud-prevention and security functionality. Depending on the activity, Stripe may act as a processor or as an independent controller.</p>
+
+    <p><strong>Google Maps Platform and Google Places</strong></p>
+    <p>Mapica uses Google Maps and Google Places for maps, place search, and related features. When these services are used, Google may receive technical information, search terms, IP addresses, and location coordinates in accordance with the Google Maps Platform terms and Google’s Privacy Policy. For certain processing, Mapica and Google act as independent controllers of the relevant personal data.</p>
+
+    <p><strong>Firebase</strong></p>
+    <p>Firebase may be used for push notification delivery and technical app functionality. For push notifications, a device or registration token and other technical information necessary to deliver the notification may be processed.</p>
+
+    <p><strong>Vercel and Cloudflare</strong></p>
+    <p>Mapica may use Vercel and, where applicable, Cloudflare for website, serverless, networking, and security infrastructure. These providers may process technical requests, IP addresses, and server logs in connection with providing their services.</p>
+
+    <p><strong>Apple and Google sign-in</strong></p>
+    <p>If you choose Sign in with Apple or Google Sign-In, the relevant provider processes information under its own privacy terms. Mapica receives only the information necessary to create or authenticate your Mapica account in accordance with the sign-in method you select.</p>
+
+    <p><strong>Travel and affiliate partners</strong></p>
+    <p>Mapica may provide links to independent providers of tickets, trains and buses, attractions, accommodation, car rentals, and other travel services. These may include providers such as Omio, Tiqets, Viator, Expedia, and DiscoverCars.</p>
+    <p>When you follow an affiliate or deep link, the partner may receive information such as a referral or affiliate identifier, the selected product, destination, travel dates or other contextual link parameters, and technical information associated with the referral.</p>
+    <p>After you leave Mapica, the partner independently collects any information you provide during search or checkout and processes that information under its own privacy policy. Mapica does not process your payment card details for these independent partner purchases.</p>
+
+    <p><strong>Authorities and legal disclosures</strong></p>
+    <p>We may disclose information where required by applicable law, a valid request from a competent authority, or where reasonably necessary to protect Mapica, its users, or legal rights.</p>
+
+    <h2>International transfers</h2>
+    <p>Some of our service providers operate internationally, so personal data may be processed outside the European Economic Area.</p>
+    <p>Where the GDPR requires additional safeguards for such transfers, we use one or more lawful mechanisms, which may include:</p>
+    <ul>
+      <li>European Commission adequacy decisions;</li>
+      <li>the EU–US Data Privacy Framework for certified organizations where applicable;</li>
+      <li>European Commission Standard Contractual Clauses;</li>
+      <li>other transfer mechanisms permitted by applicable data protection law.</li>
+    </ul>
+    <p>You can request further information about safeguards used for international transfers by contacting <a href="mailto:privacy@mapica.app">privacy@mapica.app</a>.</p>
+
+    <h2>Cookies, SDKs, and similar technologies</h2>
+    <p>Our website and app may use technical storage or access mechanisms necessary for purposes such as authentication, security, remembering user settings, deep links, and providing core functionality.</p>
+    <p>Where Mapica uses optional analytics, advertising, or tracking technologies that require consent under applicable law, those technologies should not be activated before the required consent has been obtained. Where consent is required, you must be able to refuse or withdraw it as easily as you gave it.</p>
+    <p>Once you visit an independent travel partner, that partner’s own cookie and tracking choices apply.</p>
+
+    <h2>Push notifications</h2>
+    <p>If you allow notifications, Mapica may send:</p>
+    <ul>
+      <li>trip updates;</li>
+      <li>messages relating to a Local;</li>
+      <li>order or route status updates;</li>
+      <li>security notifications;</li>
+      <li>other service-related Mapica notifications.</li>
+    </ul>
+    <p>You can disable push notifications through your iOS settings. Marketing notifications, if introduced, will be handled separately in accordance with applicable consent requirements.</p>
+
+    <h2>How long we keep information</h2>
+    <p>We do not keep personal data for longer than necessary for the purpose for which it was collected.</p>
+    <p>Unless a longer period is required by law or necessary for a dispute, we apply the following general retention periods:</p>
+    <ul>
+      <li><strong>Account and profile.</strong> While your account remains active and until account deletion is completed.</li>
+      <li><strong>Trips, private messages, and preferences.</strong> While needed for the account or service; after account deletion, these are generally deleted or anonymized from active systems within 30 days.</li>
+      <li><strong>Backups.</strong> Deleted information may remain in backup systems for up to 90 days before backup rotation or deletion.</li>
+      <li><strong>Local applications.</strong> Rejected or withdrawn applications are generally retained for no more than 12 months unless longer retention is necessary for a dispute or abuse prevention.</li>
+      <li><strong>Push tokens.</strong> Until the device is no longer registered, notifications are disabled, the account is deleted, or the token becomes invalid.</li>
+      <li><strong>Diagnostic and security logs.</strong> Generally no longer than 12 months unless longer retention is necessary to investigate a security incident.</li>
+      <li><strong>Privacy and support requests.</strong> Relevant records may be retained for up to three years after the request is closed where necessary to demonstrate compliance or protect legal rights.</li>
+      <li><strong>Payment and accounting records.</strong> For the period required by applicable accounting and tax law. Where French accounting retention requirements apply, certain accounting records may be retained for up to 10 years.</li>
+    </ul>
+    <p>After the relevant period expires, information is deleted, anonymized, or moved to restricted archival storage where continued retention is legally required.</p>
+
+    <h2>Account deletion</h2>
+    <p>If you create a Mapica account, you can initiate deletion of your account directly in the app:</p>
+    <p><strong>Profile → Account → Delete Account</strong></p>
+    <p>You can also contact <a href="mailto:privacy@mapica.app">privacy@mapica.app</a> for questions concerning deletion.</p>
+    <p>Account deletion includes deleting or anonymizing associated personal information, except information that we are required or permitted to retain for purposes such as:</p>
+    <ul>
+      <li>accounting and tax obligations;</li>
+      <li>fraud prevention;</li>
+      <li>compliance with law;</li>
+      <li>dispute resolution;</li>
+      <li>establishing, exercising, or defending legal claims.</li>
+    </ul>
+    <p>Public user-generated content associated with a deleted account will be deleted or anonymized unless there is a lawful reason to retain it.</p>
+
+    <h2>Your privacy rights</h2>
+    <p>Where the GDPR or similar law applies, you may have the right to:</p>
+    <ul>
+      <li>know whether we process your personal data;</li>
+      <li>access and obtain a copy of it;</li>
+      <li>correct inaccurate information;</li>
+      <li>request deletion;</li>
+      <li>restrict processing;</li>
+      <li>obtain certain information in a portable format;</li>
+      <li>object to processing based on legitimate interests;</li>
+      <li>withdraw consent;</li>
+      <li>object to direct marketing;</li>
+      <li>not be subject to certain decisions based solely on automated processing.</li>
+    </ul>
+    <p>To exercise your rights, contact <a href="mailto:privacy@mapica.app">privacy@mapica.app</a>. We may request reasonable information to verify your identity.</p>
+    <p>We will respond without undue delay and normally within one month of receiving your request. Where permitted by law, that period may be extended.</p>
+    <p>You also have the right to lodge a complaint with the competent data protection supervisory authority, particularly in the EEA country of your habitual residence, place of work, or the alleged infringement.</p>
+
+    <h2>Automated systems</h2>
+    <p>Mapica may use automated systems to assist with travel recommendations, itinerary organization, content selection, service improvement, and technical moderation.</p>
+    <p>Mapica does not use solely automated decision-making that produces legal or similarly significant effects on users without an appropriate lawful basis and required safeguards. Local applications are subject to human review.</p>
+    <p>If Mapica begins sending messages or other personal data to a separate third-party AI provider, this Privacy Policy and relevant in-app disclosures must be updated before that processing begins.</p>
 
     <h2>Children</h2>
-    <p>Mapica is not directed at children under 16. Do not create an account if you are under that age.</p>
+    <p>Mapica is not intended for independent use by children under 16. A person under 16 should not create their own Mapica account.</p>
+    <p>An adult account holder may provide limited information about children traveling with them, such as the number of children or age group, where necessary to prepare an appropriate trip. Please do not provide unnecessary sensitive information about a child.</p>
+    <p>If we become aware that a child has created an account in violation of our age requirements, we will take reasonable steps to delete the account and related information.</p>
 
-    <h2>Changes</h2>
-    <p>We may update this policy. The date above will change when we do. Material changes will be posted on this page.</p>
+    <h2>Security</h2>
+    <p>We use technical and organizational measures designed to protect personal information against unauthorized access, unlawful use, alteration, accidental loss, disclosure, and destruction. However, no internet service can guarantee absolute security.</p>
 
-    <h2>Contact</h2>
-    <p>Privacy questions: <a href="mailto:support@mapica.app">support@mapica.app</a> · <a href="/contact.html">Contact</a>.</p>
+    <h2>Changes to this Policy</h2>
+    <p>We may update this Privacy Policy from time to time. The “Last updated” date at the top of this page will show when the Policy was most recently changed.</p>
+    <p>If a change materially affects how personal data is used, we will provide additional notice where required by law or appropriate in light of the change.</p>
+
+    <h2>Contact us</h2>
+    <ul>
+      <li><strong>Privacy and GDPR.</strong> <a href="mailto:privacy@mapica.app">privacy@mapica.app</a></li>
+      <li><strong>Support.</strong> <a href="mailto:support@mapica.app">support@mapica.app</a></li>
+      <li><strong>General.</strong> <a href="mailto:hello@mapica.app">hello@mapica.app</a></li>
+      <li><strong>Website.</strong> <a href="https://mapica.app">https://mapica.app</a></li>
+      <li><strong>Contact.</strong> <a href="/contact.html">https://mapica.app/contact</a></li>
+    </ul>
   </main>
   <footer class="foot">
     <span class="foot-brand"><img src="/images/app-icon-180.png" width="20" height="20" alt="" /> Mapica 2026</span>
