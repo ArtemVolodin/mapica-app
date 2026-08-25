@@ -5,6 +5,7 @@ import {
   renderLocalNotFound,
   renderLocalPage,
 } from '../lib/render-local';
+import { parseUiLocale, type UiLocale } from '../lib/ui-locale';
 
 type PagesContext = {
   params: { slug: string };
@@ -12,6 +13,14 @@ type PagesContext = {
   next: (input?: Request | string) => Promise<Response>;
   request: Request;
 };
+
+function localeFromRequest(request: Request): UiLocale {
+  const url = new URL(request.url);
+  if (url.pathname === '/fr' || url.pathname.startsWith('/fr/')) {
+    return 'fr';
+  }
+  return parseUiLocale(url.searchParams.get('lang'));
+}
 
 export async function onRequestGet(context: PagesContext): Promise<Response> {
   const slug = String(context.params.slug ?? '').trim();
@@ -30,12 +39,13 @@ export async function onRequestGet(context: PagesContext): Promise<Response> {
     return context.next();
   }
 
+  const locale = localeFromRequest(context.request);
   const env = readEnv(context.env);
   try {
     const preview = await fetchLocalPreview(slug, env);
     const html = preview
-      ? renderLocalPage(preview, env)
-      : renderLocalNotFound(slug, env);
+      ? renderLocalPage(preview, env, locale)
+      : renderLocalNotFound(slug, env, locale);
     return new Response(html, {
       status: preview ? 200 : 404,
       headers: {

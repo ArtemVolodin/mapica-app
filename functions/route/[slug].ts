@@ -1,11 +1,21 @@
 import { readEnv, type SiteEnv } from '../../lib/env';
 import { fetchRoutePreview } from '../../lib/fetch-preview';
 import { renderLanding, renderNotFound } from '../../lib/render-landing';
+import { parseUiLocale, type UiLocale } from '../../lib/ui-locale';
 
 type PagesContext = {
   params: { slug: string };
   env: SiteEnv;
+  request: Request;
 };
+
+function localeFromRequest(request: Request): UiLocale {
+  const url = new URL(request.url);
+  if (url.pathname === '/fr' || url.pathname.startsWith('/fr/')) {
+    return 'fr';
+  }
+  return parseUiLocale(url.searchParams.get('lang'));
+}
 
 export async function onRequestGet(context: PagesContext): Promise<Response> {
   const slug = String(context.params.slug ?? '').trim();
@@ -13,10 +23,13 @@ export async function onRequestGet(context: PagesContext): Promise<Response> {
     return new Response('Invalid slug', { status: 400 });
   }
 
+  const locale = localeFromRequest(context.request);
   const env = readEnv(context.env);
   try {
     const preview = await fetchRoutePreview(slug, env);
-    const html = preview ? renderLanding(preview, env) : renderNotFound(slug, env);
+    const html = preview
+      ? renderLanding(preview, env, locale)
+      : renderNotFound(slug, env, locale);
     return new Response(html, {
       status: preview ? 200 : 404,
       headers: {

@@ -18,16 +18,25 @@
   <meta name="twitter:description" content="Become a Mapica Local and turn the places you love into routes travelers can actually use." />
   <meta name="twitter:image" content="https://mapica.app/images/cafe.jpg" />
   <link rel="canonical" href="https://mapica.app/local" />
+  <link rel="alternate" hreflang="en" href="https://mapica.app/local" />
+  <link rel="alternate" hreflang="fr" href="https://mapica.app/fr/local" />
+  <link rel="alternate" hreflang="x-default" href="https://mapica.app/local" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
   <link rel="stylesheet" href="/styles/creators.css" />
+  <script src="/scripts/mapica-i18n.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="nav" id="nav">
     <a class="brand" href="/"><img class="mark" src="/images/app-icon-180.png" width="32" height="32" alt="" /> Mapica</a>
     <div class="nav-links">
+      <nav class="lang-switch" aria-label="Language">
+        <a href="/local" data-locale="en" aria-current="true">EN</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/fr/local" data-locale="fr">FR</a>
+      </nav>
       <a class="nav-link nav-link-traveler" href="/">For Travelers</a>
       <button type="button" class="nav-cta" data-local-cta data-source="become_local" data-location="header">Get the app</button>
     </div>
@@ -310,9 +319,9 @@
     </span>
     <div class="foot-end">
       <nav class="foot-links" aria-label="Legal">
-        <a href="/privacy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
-        <a href="/contact.html">Contact</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/contact">Contact</a>
         <a href="https://apps.apple.com/app/mapica">App Store</a>
       </nav>
       <a

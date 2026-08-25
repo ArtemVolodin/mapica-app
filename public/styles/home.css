@@ -889,6 +889,13 @@ h1 {
   letter-spacing: -0.03em;
 }
 
+.legal h3 {
+  margin: 24px 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
 .legal p,
 .legal li {
   color: #3d3c38;
@@ -901,13 +908,115 @@ h1 {
   margin: 0 0 14px;
 }
 
-.legal ul {
+.legal ul,
+.legal ol {
   margin: 0 0 16px;
   padding-left: 1.2em;
 }
 
 .legal a {
   color: var(--accent);
+}
+
+.lang-switch {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.nav-links .lang-switch {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.lang-switch a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.lang-switch a:hover,
+.lang-switch a:focus-visible {
+  color: var(--accent);
+}
+
+.lang-switch a[aria-current="true"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.locale-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 10px 16px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+
+.locale-banner-text {
+  margin: 0;
+  color: var(--ink);
+}
+
+.locale-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.locale-banner-yes,
+.locale-banner-no {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.locale-banner-yes:hover,
+.locale-banner-no:hover {
+  color: var(--accent-press);
+}
+
+.locale-banner-close {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.statutory-box {
+  margin: 20px 0 8px;
+  padding: 18px 18px 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--white);
+}
+
+.statutory-box h3 {
+  margin-top: 0;
+}
+
+.statutory-box p {
+  font-size: 15px;
 }
 
 .contact-block {
@@ -971,11 +1080,15 @@ h1 {
 
 @media (max-width: 860px) {
   .nav-links {
-    gap: 10px;
+    gap: 8px 10px;
   }
 
   .nav-link {
     font-size: 13px;
+  }
+
+  .nav-links .lang-switch {
+    font-size: 11px;
   }
 
   .hero {

@@ -1,4 +1,21 @@
 /privacy /privacy.html 200
+/privacy.html /privacy 301
 /terms /terms.html 200
+/terms.html /terms 301
 /contact /contact.html 200
+/contact.html /contact 301
 /local /creators.html 200
+/refunds /refunds.html 200
+
+/fr /fr/index.html 200
+/fr/ /fr/index.html 200
+/fr/local /fr/creators.html 200
+/fr/privacy /fr/privacy.html 200
+/fr/privacy.html /fr/privacy 301
+/fr/terms /fr/terms.html 200
+/fr/terms.html /fr/terms 301
+/fr/contact /fr/contact.html 200
+/fr/contact.html /fr/contact 301
+
+/fr/route/:slug /api/route?slug=:slug&lang=fr 200
+/fr/:slug /api/storefront?slug=:slug&lang=fr 200

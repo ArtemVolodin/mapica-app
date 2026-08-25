@@ -1,6 +1,14 @@
 import type { SiteEnv } from './env';
 import type { CreatorReview, LocalPreview, LocalRouteCard } from './types';
 import { coverUrl } from './cover';
+import {
+  formatEuro,
+  langSwitchHtml,
+  localeHome,
+  localizedPath,
+  localUi,
+  type UiLocale,
+} from './ui-locale';
 
 function escapeHtml(value: string): string {
   return value
@@ -33,10 +41,11 @@ const RESERVED = new Set([
   'local', 'locals', 'api', 'images', 'styles', 'home', 'trip', 'trips',
   'profile', 'auth', 'login', 'welcome', 'notifications', 'l', 'index',
   'assets', 'static', 'www', 'admin', 'support', 'about', 'blog', 'help',
-  'favicon', 'robots', 'sitemap', 'mapica', 'null', 'undefined', 'staff',
+  'favicon', 'robots', 'sitemap', 'mapica', 'null', 'undefined',
+  'fr', 'refunds',
 ]);
 
-const EXPERTISE_LABELS: Record<string, string> = {
+const EXPERTISE_LABELS_EN: Record<string, string> = {
   hiddenPlaces: 'Hidden places',
   localFood: 'Food',
   restaurants: 'Restaurants',
@@ -58,6 +67,28 @@ const EXPERTISE_LABELS: Record<string, string> = {
   views: 'Viewpoints',
 };
 
+const EXPERTISE_LABELS_FR: Record<string, string> = {
+  hiddenPlaces: 'Lieux secrets',
+  localFood: 'Cuisine',
+  restaurants: 'Restaurants',
+  architecture: 'Architecture',
+  history: 'Histoire',
+  museums: 'Musées',
+  nature: 'Nature',
+  sea: 'Mer',
+  beaches: 'Plages',
+  smallTowns: 'Petites villes',
+  familyTrips: 'En famille',
+  budgetTrips: 'Voyage économique',
+  premiumTrips: 'Premium',
+  nightlife: 'Vie nocturne',
+  carRoutes: 'Road trips',
+  activeRest: 'Voyage actif',
+  calmRest: 'Voyage lent',
+  art: 'Art',
+  views: 'Belvédères',
+};
+
 export function isReservedLocalSlug(slug: string): boolean {
   const key = slug.trim().toLowerCase().replace(/^@/, '');
   return RESERVED.has(key);
@@ -71,13 +102,48 @@ function countryFlag(countryId: string | null | undefined): string {
   );
 }
 
-function expertiseLabels(raw: string[]): string[] {
+function expertiseLabels(raw: string[], locale: UiLocale): string[] {
+  const map = locale === 'fr' ? EXPERTISE_LABELS_FR : EXPERTISE_LABELS_EN;
   return raw
-    .map((key) => EXPERTISE_LABELS[key] ?? key.replace(/([A-Z])/g, ' $1').trim())
+    .map((key) => map[key] ?? key.replace(/([A-Z])/g, ' $1').trim())
     .filter(Boolean);
 }
 
-function taglineFor(preview: LocalPreview): string {
+function pathFromHref(href: string, fallbackPath: string): string {
+  const raw = (href || '').trim();
+  if (!raw) return fallbackPath;
+  if (/^https?:\/\//i.test(raw)) {
+    try {
+      return new URL(raw).pathname || fallbackPath;
+    } catch {
+      return fallbackPath;
+    }
+  }
+  return raw.startsWith('/') ? raw : `/${raw}`;
+}
+
+function absoluteLocalized(site: string, path: string, locale: UiLocale): string {
+  return `${site}${localizedPath(path, locale)}`;
+}
+
+function hrefLocalized(href: string, locale: UiLocale): string {
+  const raw = (href || '').trim();
+  if (!raw) return localizedPath('/', locale);
+  if (/^https?:\/\//i.test(raw)) {
+    try {
+      const u = new URL(raw);
+      return `${u.origin}${localizedPath(u.pathname, locale)}${u.search}${u.hash}`;
+    } catch {
+      return raw;
+    }
+  }
+  return localizedPath(raw.startsWith('/') ? raw : `/${raw}`, locale);
+}
+
+function taglineFor(
+  preview: LocalPreview,
+  ui: ReturnType<typeof localUi>,
+): string {
   const about = (preview.about || '').trim();
   if (about) {
     const first = about.split(/(?<=[.!?])\s+/)[0]?.trim();
@@ -86,17 +152,15 @@ function taglineFor(preview: LocalPreview): string {
     return `${about.slice(0, 137).trim()}…`;
   }
   const city = preview.city?.trim();
-  if (city) {
-    return `Living in ${city} and sharing routes through places I actually love.`;
-  }
-  return 'Routes through places I recommend to friends.';
+  if (city) return ui.fallbackTaglineCity(city);
+  return ui.fallbackTagline;
 }
 
-function bioFor(preview: LocalPreview): string {
+function bioFor(preview: LocalPreview, ui: ReturnType<typeof localUi>): string {
   const about = (preview.about || '').trim();
   if (about.length > 0) return about;
   const city = preview.city?.trim() || preview.country_name?.trim() || 'this region';
-  return `Living in ${city} and exploring it beyond the obvious places. I create slow routes through coastal villages, local markets, viewpoints and places I recommend to friends.`;
+  return ui.fallbackBio(city);
 }
 
 function regionLine(preview: LocalPreview): string {
@@ -105,14 +169,17 @@ function regionLine(preview: LocalPreview): string {
   return preview.city?.trim() || '';
 }
 
-function statsLine(preview: LocalPreview): string {
+function statsLine(
+  preview: LocalPreview,
+  ui: ReturnType<typeof localUi>,
+): string {
   const parts: string[] = [];
-  parts.push(`${preview.route_count} route${preview.route_count === 1 ? '' : 's'}`);
+  parts.push(ui.routeWord(preview.route_count));
   if (preview.followers_count > 0) {
-    parts.push(`${preview.followers_count} follower${preview.followers_count === 1 ? '' : 's'}`);
+    parts.push(ui.follower(preview.followers_count));
   }
   if (preview.show_travelers && preview.completed_trips > 0) {
-    parts.push(`${preview.completed_trips} traveler${preview.completed_trips === 1 ? '' : 's'}`);
+    parts.push(ui.traveler(preview.completed_trips));
   }
   return parts.join(' · ');
 }
@@ -122,37 +189,48 @@ function stars(rating: number): string {
   return '★'.repeat(full) + '☆'.repeat(5 - full);
 }
 
-function reviewByline(review: { author_name: string; author_city: string | null }): string {
-  const name = review.author_name.trim() || 'Traveler';
+function reviewByline(
+  review: { author_name: string; author_city: string | null },
+  ui: ReturnType<typeof localUi>,
+): string {
+  const name = review.author_name.trim() || ui.defaultTraveler;
   const city = review.author_city?.trim();
   return city ? `${name} · ${city}` : name;
 }
 
-function reviewCard(review: CreatorReview): string {
+function reviewCard(
+  review: CreatorReview,
+  ui: ReturnType<typeof localUi>,
+): string {
   return `<article class="review-card">
-    <p class="review-stars" aria-label="${escapeHtml(String(review.rating))} out of 5">${stars(review.rating)}</p>
+    <p class="review-stars" aria-label="${escapeHtml(ui.outOf5(review.rating))}">${stars(review.rating)}</p>
     <blockquote class="review-text">"${escapeHtml(review.review_text)}"</blockquote>
-    <p class="review-byline">${escapeHtml(reviewByline(review))}</p>
+    <p class="review-byline">${escapeHtml(reviewByline(review, ui))}</p>
   </article>`;
 }
 
-function routeCard(route: LocalRouteCard): string {
+function routeCard(
+  route: LocalRouteCard,
+  locale: UiLocale,
+  ui: ReturnType<typeof localUi>,
+): string {
   const cover = coverUrl({
     cover_image_url: route.cover_image_url,
     destination: route.city || route.country || route.title,
     city: route.city,
   });
-  const days = `${route.duration_days} day${route.duration_days === 1 ? '' : 's'}`;
-  const places = route.place_count > 0 ? `${route.place_count} places` : '';
+  const days = ui.day(route.duration_days);
+  const places = route.place_count > 0 ? ui.places(route.place_count) : '';
   const metaParts = [days, places].filter(Boolean);
   if (route.route_reviews_count > 0 && route.route_rating != null) {
     metaParts.push(`★ ${Number(route.route_rating).toFixed(1)}`);
   }
   const meta = metaParts.join(' · ');
   const subtitle = (route.short_description || route.city || route.country || '').trim();
-  const price = `€${Number(route.price_eur).toFixed(0)}`;
+  const price = formatEuro(Number(route.price_eur), locale);
+  const href = hrefLocalized(route.public_url, locale);
 
-  return `<a class="route-card" href="${escapeHtml(route.public_url)}">
+  return `<a class="route-card" href="${escapeHtml(href)}">
     <div class="route-photo"><img src="${escapeHtml(cover)}" alt="" loading="lazy" width="960" height="640" /></div>
     <div class="route-copy">
       <h3>${escapeHtml(route.title)}</h3>
@@ -161,44 +239,76 @@ function routeCard(route: LocalRouteCard): string {
         <span class="route-meta">${escapeHtml(meta)}</span>
         <span class="route-price">${escapeHtml(price)}</span>
       </div>
-      <span class="route-cta">View route →</span>
+      <span class="route-cta">${escapeHtml(ui.viewRoute)}</span>
     </div>
   </a>`;
 }
 
-export function renderLocalNotFound(slug: string, env: SiteEnv = {}): string {
-  const title = 'Creator not found';
-  const description = 'This Mapica creator page may be unpublished or the link is incorrect.';
-  const url = `${siteUrl(env)}/@${encodeURIComponent(slug.replace(/^@/, ''))}`;
+function hreflangLinks(enUrl: string, frUrl: string): string {
+  return `<link rel="alternate" hreflang="en" href="${escapeHtml(enUrl)}" />
+  <link rel="alternate" hreflang="fr" href="${escapeHtml(frUrl)}" />
+  <link rel="alternate" hreflang="x-default" href="${escapeHtml(enUrl)}" />`;
+}
+
+function topHeader(locale: UiLocale, enPath: string, frPath: string, ui: ReturnType<typeof localUi>): string {
+  return `<header class="top">
+    <a class="logo" href="${escapeHtml(localeHome(locale))}"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a>
+    ${langSwitchHtml(enPath, frPath, locale, ui.langNav)}
+  </header>`;
+}
+
+export function renderLocalNotFound(
+  slug: string,
+  env: SiteEnv = {},
+  locale: UiLocale = 'en',
+): string {
+  const ui = localUi(locale);
+  const site = siteUrl(env);
+  const path = `/@${encodeURIComponent(slug.replace(/^@/, ''))}`;
+  const pageUrl = absoluteLocalized(site, path, locale);
+  const enUrl = absoluteLocalized(site, path, 'en');
+  const frUrl = absoluteLocalized(site, path, 'fr');
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${ui.lang}">
 <head>
   <meta charset="utf-8" />
   ${HEAD_META}
-  <title>${escapeHtml(title)} · Mapica</title>
-  <meta name="description" content="${escapeHtml(description)}" />
+  <title>${escapeHtml(ui.creatorNotFoundTitle)} · Mapica</title>
+  <meta name="description" content="${escapeHtml(ui.creatorNotFoundDesc)}" />
+  <link rel="canonical" href="${escapeHtml(pageUrl)}" />
+  ${hreflangLinks(enUrl, frUrl)}
   <link rel="stylesheet" href="/styles/local.css" />
 </head>
 <body>
-  <header class="top"><a class="logo" href="/"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a></header>
+  ${topHeader(locale, localizedPath(path, 'en'), localizedPath(path, 'fr'), ui)}
   <main class="empty">
-    <p class="kicker">Local Creator</p>
-    <h1>${escapeHtml(title)}</h1>
-    <p>${escapeHtml(description)}</p>
-    <a class="btn btn-primary" href="${escapeHtml(appStoreUrl(env))}">Get the app</a>
+    <p class="kicker">${escapeHtml(ui.localCreator)}</p>
+    <h1>${escapeHtml(ui.creatorNotFoundTitle)}</h1>
+    <p>${escapeHtml(ui.creatorNotFoundDesc)}</p>
+    <a class="btn btn-primary" href="${escapeHtml(appStoreUrl(env))}">${escapeHtml(ui.getApp)}</a>
   </main>
 </body>
 </html>`;
 }
 
-export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): string {
+export function renderLocalPage(
+  preview: LocalPreview,
+  env: SiteEnv = {},
+  locale: UiLocale = 'en',
+): string {
+  const ui = localUi(locale);
   const site = siteUrl(env);
   const handle = preview.handle || preview.slug.split('-')[0];
-  const pageUrl = preview.public_url || `${site}/@${encodeURIComponent(handle)}`;
+  const fallbackPath = `/@${encodeURIComponent(handle)}`;
+  const basePath = pathFromHref(preview.public_url || '', fallbackPath);
+  const pageUrl = absoluteLocalized(site, basePath, locale);
+  const enUrl = absoluteLocalized(site, basePath, 'en');
+  const frUrl = absoluteLocalized(site, basePath, 'fr');
   const name = preview.display_name;
-  const tagline = taglineFor(preview);
-  const bio = bioFor(preview);
+  const firstName = name.split(' ')[0] || name;
+  const tagline = taglineFor(preview, ui);
+  const bio = bioFor(preview, ui);
   const description = bio.length > 160 ? `${bio.slice(0, 157)}…` : bio;
   const avatar = preview.avatar_url?.trim() || '';
   const ogImage = preview.og?.image || avatar || `${site}/images/og.jpg`;
@@ -206,11 +316,11 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
   const slugJs = JSON.stringify(preview.slug);
   const handleJs = JSON.stringify(handle);
   const creatorIdJs = JSON.stringify(preview.creator_id);
-  const followLabel = preview.is_following ? 'Following' : 'Follow';
+  const followLabel = preview.is_following ? ui.following : ui.follow;
   const followClass = preview.is_following ? 'btn btn-outline is-following' : 'btn btn-primary';
   const ratingHtml =
     preview.show_rating && preview.creator_rating != null
-      ? `<p class="creator-rating">★ ${Number(preview.creator_rating).toFixed(1)} · ${preview.reviews_count} review${preview.reviews_count === 1 ? '' : 's'}</p>`
+      ? `<p class="creator-rating">★ ${Number(preview.creator_rating).toFixed(1)} · ${escapeHtml(ui.review(preview.reviews_count))}</p>`
       : '';
   const instagram = preview.instagram_url?.trim();
   const instagramHtml = instagram
@@ -218,7 +328,7 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
     : '';
   const reviewsHtml =
     preview.reviews?.length > 0
-      ? preview.reviews.map(reviewCard).join('')
+      ? preview.reviews.map((r) => reviewCard(r, ui)).join('')
       : '';
   const flag = countryFlag(preview.country_id);
   const locationParts = [
@@ -227,8 +337,10 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
   ].filter(Boolean);
   const location = locationParts.join(' · ');
   const regions = regionLine(preview);
-  const specs = expertiseLabels(preview.expertise ?? []);
+  const specs = expertiseLabels(preview.expertise ?? [], locale);
   const initial = escapeHtml(name.trim() ? name.trim().charAt(0).toUpperCase() : 'L');
+  const personalPrice = formatEuro(39, locale);
+  const followerNeedle = locale === 'fr' ? 'abonné' : 'follower';
 
   const avatarHtml = avatar
     ? `<img class="hero-photo" src="${escapeHtml(avatar)}" alt="" width="160" height="160" />`
@@ -236,21 +348,21 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
 
   const routesHtml =
     preview.routes?.length > 0
-      ? preview.routes.map(routeCard).join('')
-      : `<p class="empty-routes">No published routes yet. Ask ${escapeHtml(name.split(' ')[0] || name)} for a personal route.</p>`;
+      ? preview.routes.map((r) => routeCard(r, locale, ui)).join('')
+      : `<p class="empty-routes">${escapeHtml(ui.emptyRoutes(firstName))}</p>`;
 
   const specsHtml = specs.length
-    ? `<div class="pill-row" aria-label="Specialties">${specs.map((s) => `<span class="pill">${escapeHtml(s)}</span>`).join('')}</div>`
+    ? `<div class="pill-row" aria-label="${escapeHtml(ui.specialties)}">${specs.map((s) => `<span class="pill">${escapeHtml(s)}</span>`).join('')}</div>`
     : '';
 
-  const ogTitle = preview.og?.title || `${name} · Local Creator`;
+  const ogTitle = preview.og?.title || `${name} · ${ui.localCreator}`;
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${ui.lang}">
 <head>
   <meta charset="utf-8" />
   ${HEAD_META}
-  <title>${escapeHtml(name)} · Local Creator · Mapica</title>
+  <title>${escapeHtml(name)} · ${escapeHtml(ui.localCreator)} · Mapica</title>
   <meta name="description" content="${escapeHtml(description)}" />
   <meta property="og:title" content="${escapeHtml(ogTitle)}" />
   <meta property="og:description" content="${escapeHtml(preview.og?.description || description)}" />
@@ -263,64 +375,65 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
   <meta name="twitter:description" content="${escapeHtml(description)}" />
   <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
   <link rel="canonical" href="${escapeHtml(pageUrl)}" />
+  ${hreflangLinks(enUrl, frUrl)}
   <link rel="stylesheet" href="/styles/local.css" />
 </head>
 <body>
-  <header class="top"><a class="logo" href="/"><img src="/images/app-icon-180.png" width="28" height="28" alt="" /> Mapica</a></header>
+  ${topHeader(locale, localizedPath(basePath, 'en'), localizedPath(basePath, 'fr'), ui)}
   <main class="creator">
     <section class="hero">
       ${avatarHtml}
-      <p class="kicker">Local Creator</p>
+      <p class="kicker">${escapeHtml(ui.localCreator)}</p>
       <h1>${escapeHtml(name)}</h1>
       ${location ? `<p class="hero-location">${escapeHtml(location)}${flag ? ` ${flag}` : ''}</p>` : ''}
       <p class="tagline">${escapeHtml(tagline)}</p>
       <div class="trust-row">
-        ${preview.verified ? '<span class="trust">✓ Verified local</span>' : ''}
+        ${preview.verified ? `<span class="trust">${escapeHtml(ui.verifiedLocal)}</span>` : ''}
         ${instagramHtml}
       </div>
       ${ratingHtml}
       ${regions ? `<p class="regions">📍 ${escapeHtml(regions)}</p>` : ''}
-      <p class="stats">${escapeHtml(statsLine(preview))}</p>
+      <p class="stats">${escapeHtml(statsLine(preview, ui))}</p>
       <div class="hero-actions">
         <button type="button" class="${followClass}" id="follow-btn" data-following="${preview.is_following ? '1' : '0'}">${escapeHtml(followLabel)}</button>
-        <button type="button" class="btn btn-outline btn-icon" id="save-btn" aria-label="Save">♡</button>
+        <button type="button" class="btn btn-outline btn-icon" id="save-btn" aria-label="${escapeHtml(ui.save)}">♡</button>
       </div>
     </section>
 
     <section class="section" aria-labelledby="about-title">
-      <h2 id="about-title">About</h2>
+      <h2 id="about-title">${escapeHtml(ui.about)}</h2>
       <p class="bio">${escapeHtml(bio)}</p>
       ${specsHtml}
     </section>
 
     <section class="section" aria-labelledby="routes-title">
-      <h2 id="routes-title">Routes</h2>
+      <h2 id="routes-title">${escapeHtml(ui.routes)}</h2>
       <div class="route-grid">${routesHtml}</div>
     </section>
 
     ${reviewsHtml ? `<section class="section" aria-labelledby="reviews-title">
-      <h2 id="reviews-title">What travelers say</h2>
+      <h2 id="reviews-title">${escapeHtml(ui.whatTravelersSay)}</h2>
       <div class="review-grid">${reviewsHtml}</div>
     </section>` : ''}
 
     <section class="section cta-block" aria-labelledby="trip-title">
-      <h2 id="trip-title">Want something made just for you?</h2>
-      <p class="cta-lede">A personal route created by ${escapeHtml(name.split(' ')[0] || name)} around your dates, interests and travel style.</p>
+      <h2 id="trip-title">${escapeHtml(ui.wantPersonal)}</h2>
+      <p class="cta-lede">${escapeHtml(ui.personalLede(firstName))}</p>
       <ul class="checklist">
-        <li>✓ Made by a local</li>
-        <li>✓ Delivered within 24 hours</li>
-        <li>✓ Interactive Mapica route</li>
-        <li>✓ Restaurants &amp; hidden places included</li>
+        <li>${escapeHtml(ui.checklistLocal)}</li>
+        <li>${escapeHtml(ui.checklist24h)}</li>
+        <li>${escapeHtml(ui.checklistInteractive)}</li>
+        <li>${escapeHtml(ui.checklistFood)}</li>
       </ul>
-      <p class="cta-note">Your local builds the route — they don&apos;t travel with you in person.</p>
-      <p class="cta-price">From €39</p>
-      <button type="button" class="btn btn-primary btn-wide" id="create-trip">Create my personal trip</button>
-      <a class="btn btn-ghost btn-wide" href="${escapeHtml(store)}">Get the app</a>
+      <p class="cta-note">${escapeHtml(ui.ctaNote)}</p>
+      <p class="cta-price">${escapeHtml(ui.fromPrice(personalPrice))}</p>
+      <button type="button" class="btn btn-primary btn-wide" id="create-trip">${escapeHtml(ui.createPersonalTrip)}</button>
+      <a class="btn btn-ghost btn-wide" href="${escapeHtml(store)}">${escapeHtml(ui.getApp)}</a>
     </section>
 
     <footer class="site-foot">
       <p class="foot-brand">Mapica</p>
-      <p class="foot-tag">Travel like you know someone there.</p>
+      <p class="foot-tag">${escapeHtml(ui.footTag)}</p>
     </footer>
   </main>
   <script>
@@ -331,6 +444,17 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
       var store = ${JSON.stringify(store)};
       var supabaseUrl = ${JSON.stringify(env.SUPABASE_URL ?? 'https://qsstbssltuzglvtrpkvh.supabase.co')};
       var supabaseAnon = ${JSON.stringify(env.SUPABASE_ANON_KEY ?? '')};
+      var followText = ${JSON.stringify(ui.follow)};
+      var followingText = ${JSON.stringify(ui.following)};
+      var followerNeedle = ${JSON.stringify(followerNeedle)};
+
+      function followerPhrase(n) {
+        ${
+          locale === 'fr'
+            ? "return n + ' abonné' + (n === 1 ? '' : 's');"
+            : "return n + ' follower' + (n === 1 ? '' : 's');"
+        }
+      }
 
       function openApp(path) {
         var deepLink = 'mapica://' + path.replace(/^\\//, '');
@@ -359,7 +483,7 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
       function setFollowState(following, followersCount) {
         var btn = document.getElementById('follow-btn');
         if (!btn) return;
-        btn.textContent = following ? 'Following' : 'Follow';
+        btn.textContent = following ? followingText : followText;
         btn.classList.toggle('is-following', !!following);
         btn.classList.toggle('btn-primary', !following);
         btn.classList.toggle('btn-outline', !!following);
@@ -368,10 +492,10 @@ export function renderLocalPage(preview: LocalPreview, env: SiteEnv = {}): strin
           var stats = document.querySelector('.stats');
           if (!stats) return;
           var parts = stats.textContent.split(' · ').filter(function (p) {
-            return p.indexOf('follower') < 0;
+            return p.indexOf(followerNeedle) < 0;
           });
           if (followersCount > 0) {
-            parts.splice(1, 0, followersCount + ' follower' + (followersCount === 1 ? '' : 's'));
+            parts.splice(1, 0, followerPhrase(followersCount));
           }
           stats.textContent = parts.join(' · ');
         }
