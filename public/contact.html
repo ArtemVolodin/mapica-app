@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#faf8f3" />
-  <title>Contact — Mapica</title>
-  <meta name="description" content="Contact Mapica: hello@mapica.app for general questions, support@mapica.app for help with your trip or account." />
+  <title>Contact & Support — Mapica</title>
+  <meta name="description" content="Get help with Mapica trips, Local Creator accounts, partnerships, privacy, legal questions, and security." />
   <link rel="canonical" href="https://mapica.app/contact" />
   <link rel="alternate" hreflang="en" href="https://mapica.app/contact" />
   <link rel="alternate" hreflang="fr" href="https://mapica.app/fr/contact" />
@@ -13,6 +13,14 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
   <script src="/scripts/mapica-i18n.js" defer></script>
+  <!-- TODO BEFORE COMMERCIAL APP STORE / PAID LAUNCH:
+Add legal entity name,
+registered address,
+SIREN / RCS,
+VAT if applicable,
+business telephone,
+and other legally required company contact information.
+-->
 </head>
 <body>
   <header class="nav" id="nav">
@@ -26,41 +34,59 @@
       <a class="nav-cta" href="https://apps.apple.com/app/mapica">Get the app</a>
     </div>
   </header>
-  <main class="legal">
-    <h1>Contact</h1>
-    <p class="meta">Mapica · personal travel planned by a local</p>
-    <p>Itineraries in the iPhone app, public route pages on this site, and ticket, stay, and car bookings via partners in the app.</p>
 
-    <div class="contact-block" role="list">
-      <a class="contact-row" role="listitem" href="mailto:hello@mapica.app">
-        <span class="contact-label">General</span>
-        <span class="contact-value">hello@mapica.app</span>
-      </a>
-      <a class="contact-row" role="listitem" href="mailto:support@mapica.app">
-        <span class="contact-label">Support</span>
-        <span class="contact-value">support@mapica.app</span>
-      </a>
-      <a class="contact-row" role="listitem" href="mailto:hello@mapica.app">
-        <span class="contact-label">Partnerships</span>
-        <span class="contact-value">hello@mapica.app</span>
-      </a>
-      <a class="contact-row" role="listitem" href="https://mapica.app">
-        <span class="contact-label">Website</span>
-        <span class="contact-value">mapica.app</span>
-      </a>
-      <a class="contact-row contact-row-last" role="listitem" href="https://apps.apple.com/app/mapica">
-        <span class="contact-label">App</span>
-        <span class="contact-value">App Store</span>
-      </a>
+  <main class="support">
+    <header class="support-hero">
+      <h1>How can we help?</h1>
+      <p class="support-intro">Whether you're planning a trip, creating as a Local, or working with Mapica, reach the right team here.</p>
+    </header>
+
+    <div class="support-grid" role="list">
+      <article class="support-card" role="listitem">
+        <h2>Traveler support</h2>
+        <p>Questions about your account, Personal Trip, Ready Route, purchases, or using Mapica.</p>
+        <a class="support-mail" href="mailto:support@mapica.app" aria-label="Email traveler support at support@mapica.app">support@mapica.app <span aria-hidden="true">→</span></a>
+      </article>
+
+      <article class="support-card" role="listitem">
+        <h2>Local Creators</h2>
+        <p>Applying to become a Local, your profile, routes, trip requests, or creator account.</p>
+        <a class="support-mail" href="mailto:locals@mapica.app" aria-label="Email Local Creators at locals@mapica.app">locals@mapica.app <span aria-hidden="true">→</span></a>
+      </article>
+
+      <article class="support-card" role="listitem">
+        <h2>Partnerships</h2>
+        <p>Travel platforms, tourism organizations, affiliates, distribution, and commercial partnerships.</p>
+        <a class="support-mail" href="mailto:partners@mapica.app" aria-label="Email partnerships at partners@mapica.app">partners@mapica.app <span aria-hidden="true">→</span></a>
+      </article>
+
+      <article class="support-card" role="listitem">
+        <h2>Privacy &amp; legal</h2>
+        <p>Privacy requests, data rights, legal questions, or formal notices.</p>
+        <div class="support-mail-stack">
+          <a class="support-mail" href="mailto:privacy@mapica.app" aria-label="Email privacy at privacy@mapica.app">privacy@mapica.app <span aria-hidden="true">→</span></a>
+          <a class="support-mail" href="mailto:legal@mapica.app" aria-label="Email legal at legal@mapica.app">legal@mapica.app <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
     </div>
 
-    <h2>Support</h2>
-    <p>Account, trip, or Local questions — email <a href="mailto:support@mapica.app">support@mapica.app</a>. We reply from the Mapica team.</p>
-    <p>For a ticket, hotel, or car you already paid for with a partner, contact that partner’s support. They issued the booking.</p>
+    <section class="support-note" aria-labelledby="partner-title">
+      <h2 id="partner-title">Booked with a travel partner?</h2>
+      <p>Tickets, hotels, activities, and car rentals booked through an independent travel partner are managed by that partner. Please use the support details in your booking confirmation for changes, cancellations, or refunds relating to that booking.</p>
+    </section>
 
-    <h2>Partnerships</h2>
-    <p>Affiliate and distribution partners (including ticket platforms): write to <a href="mailto:hello@mapica.app">hello@mapica.app</a>. Briefly describe your programme and we’ll reply.</p>
+    <section class="support-section" aria-labelledby="security-title">
+      <h2 id="security-title">Security</h2>
+      <p>Found a potential security issue affecting Mapica? Please contact our security team.</p>
+      <a class="support-mail" href="mailto:security@mapica.app" aria-label="Email security at security@mapica.app">security@mapica.app <span aria-hidden="true">→</span></a>
+    </section>
+
+    <section class="support-section" aria-labelledby="else-title">
+      <h2 id="else-title">Something else?</h2>
+      <p>For general questions that don't fit the categories above, write to us at <a href="mailto:hello@mapica.app">hello@mapica.app</a>.</p>
+    </section>
   </main>
+
   <footer class="foot">
     <span class="foot-brand"><img src="/images/app-icon-180.png" width="20" height="20" alt="" /> Mapica 2026</span>
     <div class="foot-end">
