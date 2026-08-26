@@ -13,6 +13,7 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="stylesheet" href="/styles/home.css" />
   <script src="/scripts/mapica-i18n.js" defer></script>
+  <!-- PRIVACY_VERSION: 2026-08-26 -->
 </head>
 <body>
   <header class="nav" id="nav">
@@ -28,7 +29,7 @@
   </header>
   <main class="legal">
     <h1>Politique de confidentialité de Mapica</h1>
-    <p class="meta">Dernière mise à jour : 24 août 2026 · Mapica · <a href="https://mapica.app">mapica.app</a></p>
+    <p class="meta">Dernière mise à jour : 26 août 2026 · Mapica · <a href="https://mapica.app">mapica.app</a></p>
 
     <p>La présente Politique de confidentialité explique comment Mapica collecte, utilise, conserve et partage les données personnelles lorsque vous utilisez l'application Mapica, <a href="https://mapica.app">mapica.app</a>, les pages publiques des Local Creators et des parcours, ainsi que les services Mapica associés.</p>
     <p>Mapica aide les voyageurs à recevoir des plans de voyage et des parcours personnalisés préparés par des Local Creators. Les billets, l'hébergement, la location de voitures et certains autres services de voyage peuvent être fournis par des partenaires indépendants. Une fois que vous quittez Mapica pour poursuivre vers le site ou le paiement d'un partenaire, la politique de confidentialité de ce partenaire s'applique également.</p>
@@ -217,6 +218,7 @@
       <li>le maintien de la sécurité du service ;</li>
       <li>les diagnostics techniques ;</li>
       <li>l'amélioration de la fiabilité du produit ;</li>
+      <li>l'analytique produit pour comprendre l'usage des fonctionnalités et l'expérience utilisateur ;</li>
       <li>la modération de la marketplace ;</li>
       <li>l'examen des candidatures Local ;</li>
       <li>la constatation, l'exercice ou la défense de droits en justice.</li>
@@ -243,6 +245,19 @@
 
     <p><strong>Firebase</strong></p>
     <p>Firebase peut être utilisé pour la diffusion des notifications push et des fonctionnalités techniques de l'application. Pour les notifications push, un jeton d'appareil ou d'enregistrement et d'autres informations techniques nécessaires à la diffusion de la notification peuvent être traités.</p>
+
+    <p><strong>PostHog, Inc.</strong></p>
+    <p>Mapica utilise PostHog comme service d'analytique produit afin de comprendre comment les utilisateurs interagissent avec l'application Mapica, mesurer l'usage des fonctionnalités, diagnostiquer des problèmes techniques et améliorer le produit. PostHog traite ces informations pour le compte de Mapica en tant que prestataire / sous-traitant.</p>
+    <p>Mapica a configuré l'hébergement PostHog Cloud UE (hôte d'ingestion <code>eu.i.posthog.com</code>). Selon les fonctionnalités activées dans Mapica, PostHog peut traiter des informations telles que :</p>
+    <ul>
+      <li>les interactions dans l'application et les écrans consultés ;</li>
+      <li>des identifiants de session et techniques générés par le SDK d'analytique ;</li>
+      <li>des informations sur l'appareil et l'application (par exemple type d'appareil, système d'exploitation et version de l'app) ;</li>
+      <li>des événements de diagnostic et d'usage produit (par exemple étapes du parcours de paiement, sans données de carte) ;</li>
+      <li>un identifiant de compte Mapica pseudonyme après connexion, lorsque cela est nécessaire pour comprendre l'usage du produit entre sessions.</li>
+    </ul>
+    <p>Mapica n'utilise pas Session Replay de PostHog dans la configuration actuelle de l'application. Mapica n'envoie pas à PostHog le contenu des messages de chat, les données de carte de paiement, les jetons d'authentification ni les mots de passe. Mapica n'utilise pas PostHog pour le suivi publicitaire cross-app ni pour constituer des profils publicitaires destinés à des tiers.</p>
+    <p>Les données d'événements d'analytique sont conservées selon la configuration du projet PostHog de Mapica et pas plus longtemps que nécessaire à l'amélioration du produit et au diagnostic. Vous pouvez demander la suppression des données d'analytique liées à votre compte via <a href="mailto:privacy@mapica.app">privacy@mapica.app</a> ou en supprimant votre compte Mapica.</p>
 
     <p><strong>Vercel et Cloudflare</strong></p>
     <p>Mapica peut utiliser Vercel et, le cas échéant, Cloudflare pour le site web, le serverless, le réseau et l'infrastructure de sécurité. Ces prestataires peuvent traiter des requêtes techniques, des adresses IP et des journaux serveur dans le cadre de la fourniture de leurs services.</p>
@@ -271,6 +286,7 @@
 
     <h2>Cookies, SDK et technologies similaires</h2>
     <p>Notre site et notre application peuvent utiliser des mécanismes techniques de stockage ou d'accès nécessaires à des finalités telles que l'authentification, la sécurité, la mémorisation des préférences utilisateur, les deep links et la fourniture des fonctionnalités essentielles.</p>
+    <p>L'application mobile Mapica utilise le SDK PostHog pour l'analytique produit in-app, comme décrit ci-dessus. Il ne s'agit pas d'un cas d'usage de bannière cookies web ; le site marketing de Mapica n'intègre actuellement pas PostHog.</p>
     <p>Lorsque Mapica utilise des technologies d'analytique, de publicité ou de suivi facultatives qui nécessitent un consentement en vertu du droit applicable, ces technologies ne doivent pas être activées avant l'obtention du consentement requis. Lorsque le consentement est requis, vous devez pouvoir le refuser ou le retirer aussi facilement que vous l'avez donné.</p>
     <p>Une fois que vous visitez un partenaire de voyage indépendant, ses propres choix en matière de cookies et de suivi s'appliquent.</p>
 
