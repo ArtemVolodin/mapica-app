@@ -7,6 +7,7 @@
   function normalizeLocale(value) {
     var v = String(value || '').toLowerCase();
     if (v === 'fr' || v.indexOf('fr') === 0) return 'fr';
+    if (v === 'ru' || v.indexOf('ru') === 0) return 'ru';
     return 'en';
   }
 
@@ -21,11 +22,13 @@
           break;
         }
       }
-      if (fromCookie === 'en' || fromCookie === 'fr') return fromCookie;
+      if (fromCookie === 'en' || fromCookie === 'fr' || fromCookie === 'ru') {
+        return fromCookie;
+      }
     } catch (e) {}
     try {
       var ls = localStorage.getItem(STORAGE_KEY);
-      if (ls === 'en' || ls === 'fr') return ls;
+      if (ls === 'en' || ls === 'fr' || ls === 'ru') return ls;
     } catch (e2) {}
     return null;
   }
@@ -51,21 +54,17 @@
     var path = String(pathname || '/');
     if (!path) path = '/';
     if (path.charAt(0) !== '/') path = '/' + path;
-    // Strip trailing index.html
     path = path.replace(/\/index\.html$/i, '/');
-    // Strip .html extension for known static pages
     path = path.replace(
       /\/(privacy|terms|contact|refunds|creators)\.html$/i,
       function (_, page) {
         return '/' + page.toLowerCase();
       }
     );
-    // creators.html is served as /local
     if (path === '/creators' || path === '/creators/') path = '/local';
     if (path === '/fr/creators' || path === '/fr/creators/') path = '/fr/local';
-    // Collapse trailing slash except root and /fr/
     if (path.length > 1 && path.charAt(path.length - 1) === '/') {
-      if (path !== '/fr/') path = path.slice(0, -1);
+      if (path !== '/fr/' && path !== '/ru/') path = path.slice(0, -1);
     }
     return path || '/';
   }
@@ -73,25 +72,33 @@
   function getLocaleFromPath(pathname) {
     var path = cleanPathname(pathname || (global.location && location.pathname) || '/');
     if (path === '/fr' || path === '/fr/' || path.indexOf('/fr/') === 0) return 'fr';
+    if (path === '/ru' || path === '/ru/' || path.indexOf('/ru/') === 0) return 'ru';
     return 'en';
   }
 
-  function stripFrPrefix(pathname) {
+  function stripLocalePrefix(pathname) {
     var path = cleanPathname(pathname);
-    if (path === '/fr' || path === '/fr/') return '/';
+    if (path === '/fr' || path === '/fr/' || path === '/ru' || path === '/ru/') {
+      return '/';
+    }
     if (path.indexOf('/fr/') === 0) return path.slice(3) || '/';
+    if (path.indexOf('/ru/') === 0) return path.slice(3) || '/';
     return path;
   }
 
   function equivalentPath(pathname, targetLocale) {
     var target = normalizeLocale(targetLocale);
-    var base = stripFrPrefix(pathname);
-    // Static EN pages without a FR mirror → French home.
-    var enOnly = { '/refunds': true, '/open-app': true };
+    var base = stripLocalePrefix(pathname);
+    var ruLegal = { '/terms': true, '/privacy': true, '/refunds': true };
+    var enOnly = { '/open-app': true };
     if (target === 'fr') {
       if (enOnly[base]) return '/fr/';
       if (base === '/') return '/fr/';
       return '/fr' + base;
+    }
+    if (target === 'ru') {
+      if (ruLegal[base]) return '/ru' + base;
+      return '/';
     }
     if (enOnly[base]) return base;
     return base === '/' ? '/' : base;

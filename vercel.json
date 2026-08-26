@@ -2,7 +2,13 @@
   "redirects": [
     { "source": "/terms.html", "destination": "/terms", "permanent": true },
     { "source": "/fr/terms.html", "destination": "/fr/terms", "permanent": true },
+    { "source": "/ru/terms.html", "destination": "/ru/terms", "permanent": true },
     { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/fr/privacy.html", "destination": "/fr/privacy", "permanent": true },
+    { "source": "/ru/privacy.html", "destination": "/ru/privacy", "permanent": true },
+    { "source": "/refunds.html", "destination": "/refunds", "permanent": true },
+    { "source": "/fr/refunds.html", "destination": "/fr/refunds", "permanent": true },
+    { "source": "/ru/refunds.html", "destination": "/ru/refunds", "permanent": true },
     { "source": "/contact.html", "destination": "/contact", "permanent": true }
   ],
   "rewrites": [
@@ -18,7 +24,11 @@
     { "source": "/fr/local", "destination": "/fr/creators.html" },
     { "source": "/fr/privacy", "destination": "/fr/privacy.html" },
     { "source": "/fr/terms", "destination": "/fr/terms.html" },
+    { "source": "/fr/refunds", "destination": "/fr/refunds.html" },
     { "source": "/fr/contact", "destination": "/fr/contact.html" },
+    { "source": "/ru/privacy", "destination": "/ru/privacy.html" },
+    { "source": "/ru/terms", "destination": "/ru/terms.html" },
+    { "source": "/ru/refunds", "destination": "/ru/refunds.html" },
     { "source": "/fr/route/:slug", "destination": "/api/route?slug=:slug&lang=fr" },
     { "source": "/fr/@:handle/:routeSlug", "destination": "/api/route?slug=:routeSlug&lang=fr" },
     { "source": "/fr/:slug", "destination": "/api/storefront?slug=:slug&lang=fr" },

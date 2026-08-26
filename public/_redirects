@@ -6,6 +6,7 @@
 /contact.html /contact 301
 /local /creators.html 200
 /refunds /refunds.html 200
+/refunds.html /refunds 301
 
 /fr /fr/index.html 200
 /fr/ /fr/index.html 200
@@ -14,8 +15,17 @@
 /fr/privacy.html /fr/privacy 301
 /fr/terms /fr/terms.html 200
 /fr/terms.html /fr/terms 301
+/fr/refunds /fr/refunds.html 200
+/fr/refunds.html /fr/refunds 301
 /fr/contact /fr/contact.html 200
 /fr/contact.html /fr/contact 301
+
+/ru/privacy /ru/privacy.html 200
+/ru/privacy.html /ru/privacy 301
+/ru/terms /ru/terms.html 200
+/ru/terms.html /ru/terms 301
+/ru/refunds /ru/refunds.html 200
+/ru/refunds.html /ru/refunds 301
 
 /fr/route/:slug /api/route?slug=:slug&lang=fr 200
 /fr/:slug /api/storefront?slug=:slug&lang=fr 200
