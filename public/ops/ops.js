@@ -6,6 +6,9 @@
   let session = null;
   let staff = null;
   let idleTimer = null;
+  let flash = '';
+  let renderSeq = 0;
+  let bound = false;
   const IDLE_MS = 8 * 60 * 60 * 1000;
 
   const routes = [
@@ -26,8 +29,34 @@
     return p.startsWith('/ops') ? p : '/ops';
   }
 
+  function hrefPath(href) {
+    try {
+      return new URL(href, location.origin).pathname.replace(/\/+$/, '') || '/ops';
+    } catch {
+      return '/ops';
+    }
+  }
+
+  function navItemIsActive(href) {
+    const p = path();
+    const h = hrefPath(href);
+    if (h === '/ops') return p === '/ops';
+    if (h === '/ops/locals') return p === '/ops/locals' || p.startsWith('/ops/locals/');
+    if (h === '/ops/local-applications') return p.includes('/local-applications');
+    return p === h || p.startsWith(`${h}/`);
+  }
+
+  function paintNav() {
+    document.querySelectorAll('.nav a[href^="/ops"]').forEach((a) => {
+      a.classList.toggle('active', navItemIsActive(a.getAttribute('href')));
+    });
+  }
+
   function go(href, replace) {
     history[replace ? 'replaceState' : 'pushState']({}, '', href);
+    paintNav();
+    const main = $('.main');
+    if (main) main.innerHTML = '<p class="boot">Loading…</p>';
     render();
   }
 
@@ -165,6 +194,10 @@
     const { data: { session: s } } = await sb.auth.getSession();
     session = s;
     if (!s) { staff = null; return; }
+    if (staff && staff.user_id === s.user.id && staff.active === true) {
+      bumpIdle();
+      return;
+    }
     // Authorization: staff_users row for auth.uid(), active=true. Email/domain never grants access.
     const { data, error } = await sb.from('staff_users').select('user_id, role, active').eq('user_id', s.user.id).maybeSingle();
     if (error || !data || data.active !== true) {
@@ -247,7 +280,7 @@
         btn.removeAttribute('aria-busy');
       }
       app.innerHTML = loginView(error.message || String(error));
-      bind();
+      bindOnce();
     }
   }
 
@@ -260,7 +293,7 @@
       const desc = params.get('error_description') || params.get('error') || 'Google sign-in was cancelled.';
       history.replaceState({}, '', '/ops');
       app.innerHTML = loginView(desc);
-      bind();
+      bindOnce();
       return true;
     }
     if (!hadOAuthReturn) return false;
@@ -581,9 +614,12 @@
   }
 
   async function appsView() {
+    const notice = flash;
+    flash = '';
     const { data } = await sb.from('local_applications').select('id, user_id, status, verification_status, created_at').order('created_at', { ascending: false }).limit(100);
     return layout(`<h1>Local applications</h1>
       <p class="sub">Review, request more info, approve, or decline. Every action is audited.</p>
+      ${notice ? `<div class="notice" role="status">${esc(notice)}</div>` : ''}
       <div class="table-wrap"><table><thead><tr><th>ID</th><th>User</th><th>Status</th><th>Verification</th><th>Created</th></tr></thead>
       <tbody>${(data || []).map((a) => `<tr data-href="/ops/local-applications/${a.id}"><td>${esc(a.id.slice(0,8))}</td><td>${esc(a.user_id.slice(0,8))}</td><td>${esc(a.status)}</td><td>${esc(a.verification_status)}</td><td>${fmt(a.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
   }
@@ -593,8 +629,11 @@
     if (!a) return layout('<h1>Not found</h1>');
     const { data: profile } = await sb.from('profiles').select('display_name, email').eq('id', a.user_id).maybeSingle();
     const payload = JSON.stringify(a.payload || {}, null, 2);
+    const notice = flash;
+    flash = '';
     return layout(`<h1>Application ${esc(id.slice(0, 8))}</h1>
       <p>${pill(a.status)} · ${esc(a.verification_status)} · ${esc(profile?.display_name || '')} · ${esc(profile?.email || '')}</p>
+      ${notice ? `<div class="notice" role="status">${esc(notice)}</div>` : ''}
       <div class="section card"><h2>Payload</h2><pre style="white-space:pre-wrap;font-size:12px">${esc(payload)}</pre></div>
       <div class="section card"><h2>Review</h2>
         <textarea id="app-note" rows="3" placeholder="Note for decline / more info">${esc(a.staff_request_note || '')}</textarea>
@@ -648,32 +687,36 @@
   }
 
   async function render() {
+    const seq = ++renderSeq;
     try {
       if (!sb) await initClient();
+      if (seq !== renderSeq) return;
       await loadStaff();
+      if (seq !== renderSeq) return;
       if (!session) {
         const params = new URLSearchParams(location.search);
         if (params.get('error') || /error=/.test(location.hash || '')) {
           const desc = params.get('error_description') || params.get('error') || 'Google sign-in was cancelled.';
           history.replaceState({}, '', '/ops');
           app.innerHTML = loginView(desc);
-          bind();
+          bindOnce();
           return;
         }
         // Never fetch Ops data before auth.
         app.innerHTML = loginView();
-        bind();
+        bindOnce();
         return;
       }
       {
         const stopped = await finishAuthNavigation();
         if (stopped) return;
       }
+      if (seq !== renderSeq) return;
       const p = path();
       if (!staff) {
         // Authenticated but not staff — Access Denied, zero privileged queries.
         app.innerHTML = denied();
-        bind();
+        bindOnce();
         return;
       }
       let html = '';
@@ -692,66 +735,193 @@
         else if (name === 'staff') html = await staffView();
         break;
       }
+      if (seq !== renderSeq) return;
       app.innerHTML = html || await overview();
-      bind();
+      bindOnce();
     } catch (e) {
+      if (seq !== renderSeq) return;
       app.innerHTML = loginView(e.message || String(e));
-      bind();
+      bindOnce();
     }
   }
 
-  function bind() {
-    document.querySelectorAll('a[href^="/ops"]').forEach((a) => {
-      a.addEventListener('click', (e) => {
+  async function reviewApplication(btn) {
+    const action = btn.getAttribute('data-app');
+    const note = $('#app-note')?.value || '';
+    const id = path().split('/').pop();
+    const msg = action === 'approve'
+      ? 'Approve this applicant as a Mapica Local? This creates or updates their Local profile.'
+      : action === 'decline'
+        ? 'Decline this Local application? The applicant will not become a Local.'
+        : 'Request more information from this applicant?';
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    if (!window.confirm(msg)) {
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+      return;
+    }
+    let error = null;
+    try {
+      const res = await sb.rpc('ops_review_local_application', {
+        p_application_id: id, p_action: action, p_note: note || null,
+      });
+      error = res.error;
+    } catch (e) {
+      error = e;
+    }
+    const err = $('#app-err');
+    if (error) {
+      if (err) err.textContent = error.message || String(error);
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+      return;
+    }
+    if (action === 'approve') {
+      flash = 'Local approved. The applicant is now a Mapica Local.';
+      go('/ops/local-applications', true);
+      return;
+    }
+    if (action === 'decline') {
+      flash = 'Application declined.';
+      go('/ops/local-applications', true);
+      return;
+    }
+    flash = 'More information requested.';
+    render();
+  }
+
+  async function signOutOps() {
+    session = null;
+    staff = null;
+    clearTimeout(idleTimer);
+    sessionStorage.removeItem('ops_next');
+    if (sb) await sb.auth.signOut();
+    app.innerHTML = loginView();
+    history.replaceState({}, '', '/ops');
+  }
+
+  function bindOnce() {
+    if (bound) return;
+    bound = true;
+    document.addEventListener('click', () => { if (staff) bumpIdle(); });
+    app.addEventListener('click', async (e) => {
+      const a = e.target.closest('a[href^="/ops"]');
+      if (a && app.contains(a) && !e.defaultPrevented) {
         e.preventDefault();
         go(a.getAttribute('href'));
-      });
-    });
-    document.querySelectorAll('tr[data-href]').forEach((tr) => {
-      tr.style.cursor = 'pointer';
-      tr.addEventListener('click', () => go(tr.getAttribute('data-href')));
-    });
-    $('#logout')?.addEventListener('click', async () => {
-      session = null;
-      staff = null;
-      clearTimeout(idleTimer);
-      sessionStorage.removeItem('ops_next');
-      await sb.auth.signOut();
-      app.innerHTML = loginView();
-      bind();
-      history.replaceState({}, '', '/ops');
-    });
-    $('#google-login')?.addEventListener('click', async (e) => {
-      await startGoogleLogin(e.currentTarget);
-    });
-    $('#login-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const submit = e.target.querySelector('button[type="submit"]');
-      if (submit) submit.disabled = true;
-      const fd = new FormData(e.target);
-      const { error } = await sb.auth.signInWithPassword({
-        email: String(fd.get('email') || ''),
-        password: String(fd.get('password') || ''),
-      });
-      if (error) {
-        app.innerHTML = loginView(error.message);
-        bind();
         return;
       }
-      const next = takeReturnPath();
-      go(next, true);
-    });
-    $('#trip-filters')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const params = new URLSearchParams();
-      for (const [k, v] of fd.entries()) {
-        if (v) params.set(k, String(v));
+      const tr = e.target.closest('tr[data-href]');
+      if (tr && !e.target.closest('a, button, input, select, textarea')) {
+        go(tr.getAttribute('data-href'));
+        return;
       }
-      const qs = params.toString();
-      go('/ops/personal-trips' + (qs ? '?' + qs : ''));
+      const localPick = e.target.closest('[data-local]');
+      if (localPick) {
+        const id = localPick.getAttribute('data-local');
+        ['offer-local', 'assign-local', 'reassign-local'].forEach((fid) => {
+          const el = document.getElementById(fid);
+          if (el) el.value = id;
+        });
+        return;
+      }
+      if (e.target.closest('#logout')) {
+        await signOutOps();
+        return;
+      }
+      if (e.target.closest('#google-login')) {
+        await startGoogleLogin(e.target.closest('#google-login'));
+        return;
+      }
+      const appBtn = e.target.closest('[data-app]');
+      if (appBtn) {
+        await reviewApplication(appBtn);
+        return;
+      }
+      const actLocal = e.target.closest('[data-act-local]');
+      if (actLocal) {
+        const id = path().split('/').pop();
+        const active = actLocal.getAttribute('data-act-local') === 'reactivate';
+        const msg = active
+          ? 'Reactivate this Local so they can receive offers again?'
+          : 'Deactivate this Local? They will no longer be eligible for matching or assignment.';
+        if (!window.confirm(msg)) return;
+        const reason = window.prompt('Reason (required)') || '';
+        let error = null;
+        try {
+          const res = await sb.rpc('ops_set_local_active', {
+            p_local_id: id, p_active: active, p_reason: reason,
+          });
+          error = res.error;
+        } catch (err) {
+          error = err;
+        }
+        const box = $('#local-act-err');
+        if (error && box) box.textContent = error.message || String(error);
+        else render();
+        return;
+      }
+      const act = e.target.closest('[data-act]');
+      if (act) {
+        await runAction(act.getAttribute('data-act'));
+        return;
+      }
+      const ack = e.target.closest('[data-ack]');
+      if (ack) {
+        try {
+          await sb.rpc('ops_ack_alert', { p_alert_id: ack.getAttribute('data-ack') });
+        } catch { /* ignore */ }
+        render();
+        return;
+      }
+      if (e.target.closest('#staff-add')) {
+        const id = $('#staff-id').value.trim();
+        const role = $('#staff-role').value;
+        let error = null;
+        try {
+          const res = await sb.rpc('ops_upsert_staff', { p_user_id: id, p_role: role, p_active: true });
+          error = res.error;
+        } catch (err) {
+          error = err;
+        }
+        const box = $('#staff-err');
+        if (box) box.textContent = error ? (error.message || String(error)) : 'Saved';
+        if (!error) render();
+      }
     });
-    $('#local-search')?.addEventListener('input', async (e) => {
+    app.addEventListener('submit', async (e) => {
+      if (e.target.id === 'login-form') {
+        e.preventDefault();
+        const submit = e.target.querySelector('button[type="submit"]');
+        if (submit) submit.disabled = true;
+        const fd = new FormData(e.target);
+        const { error } = await sb.auth.signInWithPassword({
+          email: String(fd.get('email') || ''),
+          password: String(fd.get('password') || ''),
+        });
+        if (error) {
+          app.innerHTML = loginView(error.message);
+          return;
+        }
+        staff = null;
+        const next = takeReturnPath();
+        go(next, true);
+        return;
+      }
+      if (e.target.id === 'trip-filters') {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const params = new URLSearchParams();
+        for (const [k, v] of fd.entries()) {
+          if (v) params.set(k, String(v));
+        }
+        const qs = params.toString();
+        go('/ops/personal-trips' + (qs ? '?' + qs : ''));
+      }
+    });
+    app.addEventListener('input', async (e) => {
+      if (e.target.id !== 'local-search') return;
       const q = e.target.value.trim();
       const box = $('#local-picker');
       if (!box) return;
@@ -763,69 +933,7 @@
       box.innerHTML = (data || []).map((l) =>
         `<button type="button" data-local="${l.id}">${esc(l.display_name)} · ${esc(l.status)}/${esc(l.verification_status)} · ${esc(l.country_id)} · ${(l.languages||[]).join(', ')} · trips ${esc(l.completed_trips)}</button>`
       ).join('') || '<p class="sub">No Locals</p>';
-      box.querySelectorAll('[data-local]').forEach((b) => {
-        b.addEventListener('click', () => {
-          const id = b.getAttribute('data-local');
-          ['offer-local', 'assign-local', 'reassign-local'].forEach((fid) => {
-            const el = document.getElementById(fid);
-            if (el) el.value = id;
-          });
-        });
-      });
     });
-    document.querySelectorAll('[data-app]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const action = btn.getAttribute('data-app');
-        const note = $('#app-note')?.value || '';
-        const id = path().split('/').pop();
-        const msg = action === 'approve'
-          ? `Approve this applicant as a Mapica Local? This creates or updates their Local profile.`
-          : action === 'decline'
-            ? `Decline this Local application? The applicant will not become a Local.`
-            : `Request more information from this applicant?`;
-        if (!window.confirm(msg)) return;
-        const { error } = await sb.rpc('ops_review_local_application', {
-          p_application_id: id, p_action: action, p_note: note || null,
-        });
-        const err = $('#app-err');
-        if (error && err) err.textContent = error.message;
-        else render();
-      });
-    });
-    document.querySelectorAll('[data-act-local]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const id = path().split('/').pop();
-        const active = btn.getAttribute('data-act-local') === 'reactivate';
-        const msg = active
-          ? 'Reactivate this Local so they can receive offers again?'
-          : 'Deactivate this Local? They will no longer be eligible for matching or assignment.';
-        if (!window.confirm(msg)) return;
-        const reason = window.prompt('Reason (required)') || '';
-        const { error } = await sb.rpc('ops_set_local_active', {
-          p_local_id: id, p_active: active, p_reason: reason,
-        });
-        const err = $('#local-act-err');
-        if (error && err) err.textContent = error.message;
-        else render();
-      });
-    });
-    document.querySelectorAll('[data-act]').forEach((btn) => {
-      btn.addEventListener('click', () => runAction(btn.getAttribute('data-act')));
-    });
-    document.querySelectorAll('[data-ack]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        await sb.rpc('ops_ack_alert', { p_alert_id: btn.getAttribute('data-ack') });
-        render();
-      });
-    });
-    $('#staff-add')?.addEventListener('click', async () => {
-      const id = $('#staff-id').value.trim();
-      const role = $('#staff-role').value;
-      const { error } = await sb.rpc('ops_upsert_staff', { p_user_id: id, p_role: role, p_active: true });
-      $('#staff-err').textContent = error ? error.message : 'Saved';
-      if (!error) render();
-    });
-    document.addEventListener('click', bumpIdle, { once: true });
   }
 
   async function runAction(act) {

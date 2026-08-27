@@ -48,7 +48,21 @@ button, input, select, textarea { font: inherit; }
   border-radius: 8px;
   cursor: pointer;
 }
-.nav a.active, .nav a:hover, .nav button.link:hover { background: var(--bg-3); color: var(--text); }
+.nav a.active, .nav a:hover, .nav a:active, .nav button.link:hover {
+  background: var(--bg-3);
+  color: var(--text);
+}
+tr[data-href] { cursor: pointer; }
+.notice {
+  background: #d4a01722;
+  border: 1px solid #d4a01766;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 0 0 16px;
+  font-size: 14px;
+}
+.btn[aria-busy="true"] { opacity: 0.7; }
 .nav .grow { flex: 1; }
 .main { padding: 24px 28px 48px; overflow-x: auto; }
 h1 { font-size: 22px; letter-spacing: -0.03em; margin: 0 0 6px; }
