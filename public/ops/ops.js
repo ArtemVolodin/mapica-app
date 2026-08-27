@@ -9,7 +9,23 @@
   let flash = '';
   let renderSeq = 0;
   let bound = false;
+  let openAlerts = 0;
+  let lastExportPayload = null;
   const IDLE_MS = 8 * 60 * 60 * 1000;
+  const ICO = {
+    overview: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+    trips: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13l5 5v5H3z"/><path d="M16 7v5h5"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>',
+    locals: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    apps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>',
+    alerts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/><path d="M12 3a6 6 0 0 1 6 6c0 7 1 8 1 8H5s1-1 1-8a6 6 0 0 1 6-6"/></svg>',
+    audit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>',
+    staff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4z"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+    mark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    logout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m5.6 5.6 2.8 2.8"/><path d="m15.6 15.6 2.8 2.8"/><path d="m18.4 5.6-2.8 2.8"/><path d="m8.4 15.6-2.8 2.8"/></svg>',
+  };
 
   const routes = [
     [/^\/ops\/?$/, 'overview'],
@@ -50,6 +66,99 @@
     document.querySelectorAll('.nav a[href^="/ops"]').forEach((a) => {
       a.classList.toggle('active', navItemIsActive(a.getAttribute('href')));
     });
+  }
+
+  function initials(email) {
+    const local = String(email || 'S').split('@')[0];
+    const parts = local.split(/[._-]+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return local.slice(0, 2).toUpperCase();
+  }
+
+  function displayName(email) {
+    const local = String(email || '').split('@')[0] || 'Staff';
+    return local.replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  function relTime(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) return '—';
+    const sec = Math.round((Date.now() - d.getTime()) / 1000);
+    if (sec < 60) return 'just now';
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m ago`;
+    const h = Math.floor(min / 60);
+    if (h < 48) return `${h}h ago`;
+    const days = Math.floor(h / 24);
+    if (days < 14) return `${days}d ago`;
+    return d.toLocaleDateString();
+  }
+
+  function humanReason(reason) {
+    if (!reason) return 'Needs review';
+    return String(reason).replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  function priorityBadge(p) {
+    const raw = String(p || 'normal').toLowerCase();
+    const cls = raw === 'urgent' || raw === 'high' ? `prio-${raw === 'urgent' ? 'urgent' : 'high'}`
+      : raw === 'low' ? 'prio-low' : 'prio-medium';
+    const label = raw === 'urgent' ? 'Urgent' : raw === 'high' ? 'High' : raw === 'low' ? 'Low' : 'Medium';
+    return `<span class="ops-badge ${cls}">${esc(label)}</span>`;
+  }
+
+  function pageHeader(title, sub, actionsHtml = '') {
+    return `<div class="ops-page-header">
+      <div>
+        <h1>${esc(title)}</h1>
+        <p class="sub">${esc(sub || '')}</p>
+      </div>
+      ${actionsHtml ? `<div class="ops-page-actions">${actionsHtml}</div>` : ''}
+    </div>`;
+  }
+
+  function emptyState(title, body) {
+    return `<div class="ops-empty"><strong>${esc(title)}</strong>${esc(body || '')}</div>`;
+  }
+
+  function kpiCard({ value, label, tone, href, delta, icon }) {
+    const tag = href ? 'a' : 'div';
+    const hrefAttr = href ? ` href="${esc(href)}"` : '';
+    return `<${tag} class="kpi-card kpi-${esc(tone)}"${hrefAttr}>
+      ${icon ? `<span class="kpi-ico" aria-hidden="true">${icon}</span>` : ''}
+      <div class="n">${esc(value ?? 0)}</div>
+      <div class="l">${esc(label)}</div>
+      ${delta ? `<div class="d ${esc(delta.cls || '')}">${esc(delta.text)}</div>` : ''}
+    </${tag}>`;
+  }
+
+  function activityIcon(action) {
+    const a = String(action || '').toLowerCase();
+    if (a.includes('application') || a.includes('approve') || a.includes('decline')) return ICO.apps;
+    if (a.includes('alert') || a.includes('ack')) return ICO.alerts;
+    if (a.includes('assign') || a.includes('offer') || a.includes('local')) return ICO.locals;
+    if (a.includes('payment') || a.includes('paid')) return ICO.trips;
+    return ICO.audit;
+  }
+
+  function activityTitle(action) {
+    const map = {
+      approve_local_application: 'Application approved',
+      decline_local_application: 'Application declined',
+      request_info_local_application: 'More info requested',
+      offer_to_local: 'Local offered',
+      assign_local: 'Local assigned',
+      assign_to_me: 'Self-assigned',
+      reassign_local: 'Local reassigned',
+      set_priority: 'Priority updated',
+      set_owner: 'Owner assigned',
+      mark_unavailable: 'Trip unavailable',
+      add_note: 'Note added',
+      ack_alert: 'Alert acknowledged',
+      upsert_staff: 'Staff updated',
+    };
+    return map[action] || humanReason(action || 'Ops event');
   }
 
   function go(href, replace) {
@@ -107,19 +216,38 @@
 
   function layout(body) {
     const role = staff?.role || '';
+    const email = session?.user?.email || '';
+    const nav = (href, label, icon, badge) => {
+      const active = navItemIsActive(href) ? ' active' : '';
+      const badgeHtml = badge
+        ? `<span class="nav-badge" aria-label="${esc(badge)} open alerts">${esc(badge)}</span>`
+        : '';
+      return `<a class="nav-link${active}" href="${href}"><span class="nav-ico" aria-hidden="true">${icon}</span><span>${label}</span>${badgeHtml}</a>`;
+    };
     return `<div class="app">
-      <nav class="nav">
-        <div class="brand">MAPICA OPS</div>
-        <a href="/ops" class="${path() === '/ops' ? 'active' : ''}">Overview</a>
-        <a href="/ops/personal-trips" class="${path().includes('/personal-trips') ? 'active' : ''}">Personal Trips</a>
-        <a href="/ops/locals" class="${path().includes('/locals') && !path().includes('application') ? 'active' : ''}">Locals</a>
-        <a href="/ops/local-applications" class="${path().includes('application') ? 'active' : ''}">Applications</a>
-        <a href="/ops/alerts" class="${path().includes('/alerts') ? 'active' : ''}">Alerts</a>
-        <a href="/ops/audit" class="${path().includes('/audit') ? 'active' : ''}">Audit</a>
-        ${role === 'admin' ? `<a href="/ops/staff" class="${path().includes('/staff') ? 'active' : ''}">Staff</a>` : ''}
+      <nav class="nav" aria-label="Ops navigation">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">${ICO.mark}</span>
+          <span>MAPICA OPS</span>
+        </div>
+        ${nav('/ops', 'Overview', ICO.overview)}
+        ${nav('/ops/personal-trips', 'Personal Trips', ICO.trips)}
+        ${nav('/ops/locals', 'Locals', ICO.locals)}
+        ${nav('/ops/local-applications', 'Applications', ICO.apps)}
+        ${nav('/ops/alerts', 'Alerts', ICO.alerts, openAlerts > 0 ? openAlerts : null)}
+        ${nav('/ops/audit', 'Audit', ICO.audit)}
+        ${role === 'admin' ? nav('/ops/staff', 'Staff', ICO.staff) : ''}
         <div class="grow"></div>
-        <div class="sub" style="margin:8px">${esc(session?.user?.email || '')}<br>${esc(role)}</div>
-        <button class="link" id="logout">Log out</button>
+        <div class="nav-profile">
+          <div class="nav-profile-row">
+            <div class="nav-avatar" aria-hidden="true">${esc(initials(email))}</div>
+            <div class="nav-profile-meta">
+              <div class="nav-profile-name" title="${esc(email)}">${esc(displayName(email))}</div>
+              <div class="nav-profile-role">${esc(role || 'staff')}</div>
+            </div>
+          </div>
+          <button type="button" class="nav-logout" id="logout">${ICO.logout}<span>Log out</span></button>
+        </div>
       </nav>
       <main class="main">${body}</main>
     </div>`;
@@ -234,7 +362,10 @@
 
   function loginView(err) {
     return `<div class="login">
-      <div class="brand">MAPICA OPS</div>
+      <div class="brand" style="margin:0 0 14px">
+        <span class="brand-mark" aria-hidden="true">${ICO.mark}</span>
+        <span>MAPICA OPS</span>
+      </div>
       <h1>Secure staff access</h1>
       <p class="sub">Access is restricted to authorized Mapica staff.</p>
       <button type="button" class="btn google" id="google-login" aria-label="Continue with Google">
@@ -305,40 +436,170 @@
   async function overview() {
     const { data, error } = await sb.rpc('ops_overview_stats');
     const s = data || {};
-    const { data: attn } = await sb.from('trips').select('id, status, ops_reason, created_at, request_id, ops_priority')
-      .eq('status', 'ops_review').order('created_at', { ascending: true }).limit(20);
+    const { data: attn } = await sb.from('trips')
+      .select('id, status, ops_reason, created_at, request_id, ops_priority')
+      .eq('status', 'ops_review')
+      .order('created_at', { ascending: true })
+      .limit(12);
+    const attnRows = attn || [];
+    const reqIds = attnRows.map((t) => t.request_id).filter(Boolean);
+    const { data: reqs } = reqIds.length
+      ? await sb.from('trip_requests').select('id, destinations').in('id', reqIds)
+      : { data: [] };
+    const reqBy = Object.fromEntries((reqs || []).map((r) => [r.id, r]));
+    const { data: recent } = await sb.from('ops_audit_log')
+      .select('id, occurred_at, action, actor_user_id, resource_type, resource_id, trip_id, reason')
+      .order('occurred_at', { ascending: false })
+      .limit(8);
+
+    const n = (v) => (v == null ? 0 : v);
+    const matching = n(s.matching_now);
+    const inProgress = n(s.in_progress);
+    const confirmed = n(s.local_confirmed);
+    const awaiting = n(s.awaiting_payment);
+    const overdue = n(s.overdue);
+    const chartTotal = matching + inProgress + confirmed + awaiting + overdue;
+    const pct = (v) => (chartTotal > 0 ? Math.round((v / chartTotal) * 1000) / 10 : 0);
+    const p1 = pct(inProgress);
+    const p2 = pct(matching);
+    const p3 = pct(confirmed);
+    const p4 = pct(awaiting);
+    const p5 = Math.max(0, Math.round((1000 - (p1 + p2 + p3 + p4) * 10)) / 10);
+
+    const reasons = Object.entries(s.ops_reasons || {});
+    const reasonMax = Math.max(1, ...reasons.map(([, v]) => Number(v) || 0));
+    const reasonsHtml = reasons.length
+      ? `<div class="reason-bars">${reasons.map(([k, v]) => {
+          const width = Math.max(4, Math.round((Number(v) / reasonMax) * 100));
+          return `<div class="reason-row">
+            <div class="label" title="${esc(k)}">${esc(humanReason(k))}</div>
+            <div class="reason-track"><div class="reason-fill" style="width:${width}%"></div></div>
+            <div class="count">${esc(v)}</div>
+          </div>`;
+        }).join('')}</div>`
+      : emptyState('No escalations in the last 30 days', 'Ops reasons will appear here when trips enter review.');
+
+    const attnHtml = attnRows.length
+      ? `<div class="attn-head"><span>Trip / destination</span><span>Reason</span><span>Priority</span><span>Time</span></div>
+        <div class="attn-list">${attnRows.map((t) => {
+          const dest = ((reqBy[t.request_id] || {}).destinations || []).filter(Boolean).join(', ');
+          const title = dest || `Trip ${String(t.id).slice(0, 8)}`;
+          return `<div class="attn-row" data-href="/ops/personal-trips/${t.id}" role="link" tabindex="0">
+            <div>
+              <div class="attn-title">${esc(title)}</div>
+              <div class="attn-sub mono">${esc(String(t.id).slice(0, 8))}</div>
+            </div>
+            <div class="attn-reason">${esc(humanReason(t.ops_reason))}</div>
+            <div>${priorityBadge(t.ops_priority)}</div>
+            <div class="attn-time">${esc(relTime(t.created_at))}</div>
+          </div>`;
+        }).join('')}</div>`
+      : emptyState('All clear — no trips require attention.', 'New escalations will show up here automatically.');
+
+    const activityHtml = (recent || []).length
+      ? `<div class="activity-list">${(recent || []).map((e) => {
+          const ctx = e.trip_id
+            ? `Trip ${String(e.trip_id).slice(0, 8)}${e.reason ? ` · ${humanReason(e.reason)}` : ''}`
+            : (e.resource_type ? `${humanReason(e.resource_type)}${e.resource_id ? ` ${String(e.resource_id).slice(0, 8)}` : ''}` : 'Ops system');
+          return `<div class="activity-row">
+            <div class="activity-ico" aria-hidden="true">${activityIcon(e.action)}</div>
+            <div>
+              <div class="activity-title">${esc(activityTitle(e.action))}</div>
+              <div class="activity-sub">${esc(ctx)}</div>
+            </div>
+            <div class="activity-time">${esc(relTime(e.occurred_at))}</div>
+          </div>`;
+        }).join('')}</div>`
+      : emptyState('No recent Ops activity.', 'Audited actions will appear here.');
+
+    const donutStyle = chartTotal > 0
+      ? `--p1:${p1};--p2:${p2};--p3:${p3};--p4:${p4};--p5:${p5};`
+      : '--p1:0;--p2:0;--p3:0;--p4:0;--p5:0;';
+
+    const exportPayload = {
+      generated_at: new Date().toISOString(),
+      window: 'live_ops_counts_plus_30d_performance',
+      stats: s,
+    };
+    lastExportPayload = exportPayload;
+
     return layout(`
-      <h1>Overview</h1>
-      <p class="sub">${error ? esc(error.message) : 'Operational control center'}</p>
-      <div class="cards">
-        ${card(s.personal_trips_today, 'Personal Trips today')}
-        ${card(s.matching_now, 'Matching now')}
-        ${card(s.needs_attention, 'Needs attention')}
-        ${card(s.local_confirmed, 'Local confirmed')}
-        ${card(s.awaiting_payment, 'Awaiting payment')}
-        ${card(s.in_progress, 'In progress')}
-        ${card(s.ready_today, 'Ready today')}
-        ${card(s.overdue, 'Overdue')}
+      ${pageHeader('Overview', error ? error.message : 'Operational control center', `
+        <div class="ops-control" title="Performance metrics use a 30-day window">
+          ${ICO.calendar}
+          <span>Last 30 days</span>
+        </div>
+        <button type="button" class="btn secondary" id="ops-export">
+          ${ICO.download}<span>Export</span>
+        </button>
+      `)}
+
+      <div class="kpi-grid" aria-label="Primary operational KPIs">
+        ${kpiCard({ value: n(s.personal_trips_today), label: 'Personal Trips', tone: 'teal', href: '/ops/personal-trips', icon: ICO.trips, delta: { text: 'Created today', cls: '' } })}
+        ${kpiCard({ value: matching, label: 'Matching now', tone: 'purple', href: '/ops/personal-trips?status=matching', icon: ICO.spark, delta: { text: 'Active matching', cls: '' } })}
+        ${kpiCard({ value: n(s.needs_attention), label: 'Needs attention', tone: 'coral', href: '/ops/personal-trips?attn=1', icon: ICO.alerts, delta: { text: n(s.needs_attention) ? 'Requires Ops' : 'All clear', cls: n(s.needs_attention) ? 'warn' : 'up' } })}
+        ${kpiCard({ value: confirmed, label: 'Local confirmed', tone: 'green', href: '/ops/personal-trips?status=local_confirmed', icon: ICO.locals, delta: { text: 'Ready for payment', cls: '' } })}
+        ${kpiCard({ value: awaiting, label: 'Awaiting payment', tone: 'blue', href: '/ops/personal-trips?status=awaiting_payment', icon: ICO.trips, delta: { text: 'Checkout pending', cls: '' } })}
+        ${kpiCard({ value: inProgress, label: 'In progress', tone: 'indigo', href: '/ops/personal-trips?status=planning', icon: ICO.overview, delta: { text: 'Fulfillment open', cls: '' } })}
+        ${kpiCard({ value: overdue, label: 'Overdue', tone: 'red', href: '/ops/personal-trips?overdue=1', icon: ICO.alerts, delta: { text: overdue ? 'Past SLA due' : 'None overdue', cls: overdue ? 'down' : 'up' } })}
+        ${kpiCard({ value: n(s.ready_today), label: 'Ready today', tone: 'lime', href: '/ops/personal-trips?status=ready', icon: ICO.apps, delta: { text: 'Completed today', cls: 'up' } })}
       </div>
-      <div class="cards">
-        ${card((s.automatic_pct ?? 0) + '%', 'Automatic assignment')}
-        ${card((s.manual_pct ?? 0) + '%', 'Manual assignment')}
-        ${card((s.self_assign_pct ?? 0) + '%', 'Self-assignment')}
-        ${card((s.no_candidate_pct ?? 0) + '%', 'No candidate')}
-        ${card((s.all_declined_pct ?? 0) + '%', 'All declined')}
-        ${card((s.match_timeout_pct ?? 0) + '%', 'Match timeout')}
-        ${card(s.median_match_minutes != null ? Math.round(s.median_match_minutes) + 'm' : 'N/A', 'Median match time')}
-        ${card(s.median_ops_minutes != null ? Math.round(s.median_ops_minutes) + 'm' : 'N/A', 'Median Ops resolution')}
-        ${card((s.sla_success_pct ?? 0) + '%', '24h SLA success')}
-        ${card(s.open_requests, 'Open requests')}
-        ${card(s.zero_candidates, 'Zero candidates (30d)')}
-        ${card(s.open_alerts, 'Open alerts')}
+
+      <div class="ops-dash-row">
+        <section class="ops-card" aria-labelledby="attn-title">
+          <div class="ops-card-head">
+            <h2 class="ops-card-title" id="attn-title">Needs attention</h2>
+            <a class="ops-card-link" href="/ops/personal-trips?attn=1">View all</a>
+          </div>
+          ${attnHtml}
+        </section>
+        <div class="ops-side-stack">
+          <section class="ops-card" aria-labelledby="trips-ov-title">
+            <div class="ops-card-head">
+              <h2 class="ops-card-title" id="trips-ov-title">Trips overview</h2>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut${chartTotal ? '' : ' donut-empty'}" style="${donutStyle}" role="img" aria-label="Trip status distribution">
+                <div class="donut-center">
+                  <strong>${esc(chartTotal)}</strong>
+                  <span>active</span>
+                </div>
+              </div>
+              <ul class="donut-legend">
+                <li><i style="background:var(--ops-indigo)"></i>In progress <b>${esc(inProgress)}</b></li>
+                <li><i style="background:var(--ops-purple)"></i>Matching <b>${esc(matching)}</b></li>
+                <li><i style="background:var(--ops-green)"></i>Confirmed <b>${esc(confirmed)}</b></li>
+                <li><i style="background:var(--ops-blue)"></i>Awaiting payment <b>${esc(awaiting)}</b></li>
+                <li><i style="background:var(--ops-red)"></i>Overdue <b>${esc(overdue)}</b></li>
+              </ul>
+            </div>
+          </section>
+          <section class="ops-card" aria-labelledby="activity-title">
+            <div class="ops-card-head">
+              <h2 class="ops-card-title" id="activity-title">Recent activity</h2>
+              <a class="ops-card-link" href="/ops/audit">Audit</a>
+            </div>
+            ${activityHtml}
+          </section>
+        </div>
       </div>
-      <h2>Ops reasons (30 days)</h2>
-      <div class="reasons">${Object.entries(s.ops_reasons || {}).map(([k, v]) => `<span>${esc(k)} · ${esc(v)}</span>`).join('') || '<span>N/A</span>'}</div>
-      <h2>Needs attention</h2>
-      <div class="table-wrap"><table><thead><tr><th>Trip</th><th>Priority</th><th>Reason</th><th>Created</th></tr></thead>
-      <tbody>${(attn || []).map((t) => `<tr data-href="/ops/personal-trips/${t.id}"><td>${esc(t.id.slice(0, 8))}</td><td>${esc(t.ops_priority)}</td><td>${esc(t.ops_reason || '—')}</td><td>${fmt(t.created_at)}</td></tr>`).join('') || '<tr><td colspan="4">None</td></tr>'}</tbody></table></div>
+
+      <section class="ops-card" aria-labelledby="perf-title">
+        <div class="ops-card-head">
+          <h2 class="ops-card-title" id="perf-title">Operational performance</h2>
+        </div>
+        <div class="perf-grid">
+          <div class="perf-stat"><div class="n">${esc((s.automatic_pct ?? 0) + '%')}</div><div class="l">Automatic assignment</div></div>
+          <div class="perf-stat"><div class="n">${esc((s.manual_pct ?? 0) + '%')}</div><div class="l">Manual assignment</div></div>
+          <div class="perf-stat"><div class="n">${esc(s.median_match_minutes != null ? Math.round(s.median_match_minutes) + 'm' : '—')}</div><div class="l">Median match time</div></div>
+          <div class="perf-stat"><div class="n">${esc((s.sla_success_pct ?? 0) + '%')}</div><div class="l">24h SLA success</div></div>
+          <div class="perf-stat"><div class="n">${esc((s.no_candidate_pct ?? 0) + '%')}</div><div class="l">No candidate rate</div></div>
+          <div class="perf-stat"><div class="n">${esc(n(s.open_alerts))}</div><div class="l">Open alerts</div></div>
+        </div>
+        <div style="height:18px"></div>
+        <div class="ops-section-label">Ops reasons (30 days)</div>
+        ${reasonsHtml}
+      </section>
     `);
   }
 
@@ -458,26 +719,25 @@
         <td>${esc(slaLabel(t))}</td>
         <td>${fmt(t.last_activity_at)}</td>
         <td>${esc((t.ops_owner_user_id || '').slice(0, 8) || '—')}</td>
-        <td>${esc(t.ops_priority)}</td>
+        <td>${priorityBadge(t.ops_priority)}</td>
         <td>${noted.has(t.id) ? 'Yes' : '—'}</td>
       </tr>`;
     }).join('');
     return layout(`
-      <h1>Personal Trips</h1>
-      <p class="sub">Default: needs attention first, then oldest waiting request.</p>
+      ${pageHeader('Personal Trips', 'Default: needs attention first, then oldest waiting request.')}
       <form class="filters" id="trip-filters">
-        <select name="status">
+        <select name="status" aria-label="Status">
           <option value="">All statuses</option>
           ${['requested','matching','offered','ops_review','local_confirmed','awaiting_payment','planning','ready','unavailable'].map((s) => `<option ${status===s?'selected':''} value="${s}">${s}</option>`).join('')}
         </select>
-        <select name="assignment">
+        <select name="assignment" aria-label="Assignment type">
           <option value="">Assignment type</option>
           ${['automatic','manual','manual_self'].map((s) => `<option ${q.get('assignment')===s?'selected':''} value="${s}">${s}</option>`).join('')}
         </select>
         <label><input type="checkbox" name="unassigned" value="1" ${q.get('unassigned')==='1'?'checked':''}/> Unassigned</label>
         <label><input type="checkbox" name="attn" value="1" ${q.get('attn')==='1'?'checked':''}/> Needs attention</label>
         <label><input type="checkbox" name="overdue" value="1" ${q.get('overdue')==='1'?'checked':''}/> Overdue</label>
-        <input name="q" placeholder="Search ID / traveler / email / Local / destination" value="${esc(q.get('q') || '')}" />
+        <input name="q" placeholder="Search ID / traveler / email / Local / destination" value="${esc(q.get('q') || '')}" aria-label="Search trips" />
         <button class="btn secondary" type="submit">Filter</button>
       </form>
       <div class="table-wrap"><table>
@@ -492,7 +752,7 @@
           <th>Ready At</th><th>Completed At</th><th>SLA Status</th><th>Last Activity</th>
           <th>Ops Owner</th><th>Priority</th><th>Notes</th>
         </tr></thead>
-        <tbody>${body || '<tr><td colspan="36">No trips</td></tr>'}</tbody>
+        <tbody>${body || '<tr><td colspan="36">No trips match these filters.</td></tr>'}</tbody>
       </table></div>
     `);
   }
@@ -513,20 +773,20 @@
     const canSelf = myLocal && myLocal.status === 'approved' && myLocal.verification_status === 'approved';
     const dest = (req?.destinations || []).join(', ');
     return layout(`
-      <h1>Request ${esc(id.slice(0, 8))}</h1>
-      <p class="sub">${pill(t.status)} · priority ${esc(t.ops_priority)} · ${esc(t.ops_reason || 'no ops reason')}</p>
+      ${pageHeader(`Request ${id.slice(0, 8)}`, `${t.status} · priority ${t.ops_priority || 'normal'} · ${t.ops_reason || 'no ops reason'}`)}
+      <p class="sub" style="margin-top:-12px;margin-bottom:18px">${pill(t.status)} ${priorityBadge(t.ops_priority)}</p>
       <div class="grid2">
         <div>
           <div class="section card"><h2>Request</h2>
-            <p>Request ID ${esc(t.request_id)}<br>Trip ID ${esc(t.id)}<br>Created ${fmt(t.created_at)}</p></div>
+            <p>Request ID <span class="mono">${esc(t.request_id)}</span><br>Trip ID <span class="mono">${esc(t.id)}</span><br>Created ${fmt(t.created_at)}</p></div>
           <div class="section card"><h2>Traveler</h2>
-            <p>${esc(profile?.display_name)}<br>${esc(profile?.email)}<br>Language ${esc(profile?.language_code)}<br>Account ${esc(t.user_id)}</p></div>
+            <p>${esc(profile?.display_name)}<br>${esc(profile?.email)}<br>Language ${esc(profile?.language_code)}<br>Account <span class="mono">${esc(t.user_id)}</span></p></div>
           <div class="section card"><h2>Trip</h2>
             <p>${esc(dest)}<br>${esc(req?.start_date)} – ${esc(req?.end_date)}<br>Party ${esc(req?.traveler_count)} · ${esc(req?.traveler_type)}<br>Budget ${esc(req?.budget)} · pace ${esc(req?.pace)}<br>${esc(req?.user_message || '')}</p></div>
           <div class="section card"><h2>Matching / assignment</h2>
             <p>Type ${esc(t.assignment_type || '—')}<br>Assigned ${esc(local?.display_name || '—')}<br>Confirmed ${fmt(t.local_confirmed_at)}</p>
             <table><thead><tr><th>Local</th><th>Status</th><th>Type</th><th>Offered</th><th>Expires</th></tr></thead>
-            <tbody>${(assigns || []).map((a) => `<tr><td>${esc(a.local_id.slice(0,8))}</td><td>${esc(a.status)}</td><td>${esc(a.assignment_type)}</td><td>${fmt(a.offered_at)}</td><td>${fmt(a.expires_at)}</td></tr>`).join('')}</tbody></table>
+            <tbody>${(assigns || []).map((a) => `<tr><td class="mono">${esc(a.local_id.slice(0,8))}</td><td>${esc(a.status)}</td><td>${esc(a.assignment_type)}</td><td>${fmt(a.offered_at)}</td><td>${fmt(a.expires_at)}</td></tr>`).join('')}</tbody></table>
           </div>
           <div class="section card"><h2>Payment</h2>
             ${(orders || []).map((o) => `<p>${esc(o.order_number)} · ${esc(o.status)} · ${(o.gross_amount_minor/100).toFixed(0)} ${esc(o.currency)} · paid ${fmt(o.paid_at)}</p>`).join('') || '<p>No order yet</p>'}
@@ -544,8 +804,8 @@
             <input id="local-search" class="field" placeholder="Name or region" />
             <div class="picker" id="local-picker"></div>
             <input id="offer-local" class="field" placeholder="Selected Local id" />
-            <button class="btn" data-act="offer">Offer to Local</button>
-            <hr style="border:0;border-top:1px solid var(--line);margin:14px 0" />
+            <div class="btn-row"><button class="btn" data-act="offer">Offer to Local</button></div>
+            <hr style="border:0;border-top:1px solid var(--ops-border);margin:14px 0" />
             <input id="assign-local" class="field" placeholder="Local id to assign" />
             <select id="assign-reason" class="field">
               <option value="">Assignment reason</option>
@@ -554,9 +814,11 @@
               <option>creator_requested</option>
               <option>other</option>
             </select>
-            <button class="btn" data-act="assign">Assign Local</button>
-            ${canSelf ? `<button class="btn secondary" data-act="assign-me">Assign to me</button>` : ''}
-            <hr style="border:0;border-top:1px solid var(--line);margin:14px 0" />
+            <div class="btn-row">
+              <button class="btn" data-act="assign">Assign Local</button>
+              ${canSelf ? `<button class="btn secondary" data-act="assign-me">Assign to me</button>` : ''}
+            </div>
+            <hr style="border:0;border-top:1px solid var(--ops-border);margin:14px 0" />
             <input id="reassign-local" class="field" placeholder="new local id" />
             <select id="reassign-reason" class="field">
               <option value="">Reassign reason</option>
@@ -567,18 +829,20 @@
               <option>staff_override</option>
               <option>other</option>
             </select>
-            <button class="btn secondary" data-act="reassign">Reassign</button>
-            <hr style="border:0;border-top:1px solid var(--line);margin:14px 0" />
+            <div class="btn-row"><button class="btn secondary" data-act="reassign">Reassign</button></div>
+            <hr style="border:0;border-top:1px solid var(--ops-border);margin:14px 0" />
             <select id="prio" class="field">${['normal','high','urgent'].map((p)=>`<option ${t.ops_priority===p?'selected':''}>${p}</option>`).join('')}</select>
-            <button class="btn secondary" data-act="prio">Set priority</button>
-            <button class="btn secondary" data-act="take">Take ownership</button>
-            <button class="btn danger" data-act="unavail">Mark unavailable</button>
+            <div class="btn-row">
+              <button class="btn secondary" data-act="prio">Set priority</button>
+              <button class="btn secondary" data-act="take">Take ownership</button>
+              <button class="btn danger" data-act="unavail">Mark unavailable</button>
+            </div>
             <p class="err" id="act-err"></p>
           </div>
           <div class="section card"><h2>Internal notes</h2>
-            ${(notes || []).map((n) => `<div class="note">${esc(n.body)}<br><time>${fmt(n.created_at)}</time></div>`).join('') || '<p class="sub">None</p>'}
+            ${(notes || []).map((n) => `<div class="note">${esc(n.body)}<br><time>${fmt(n.created_at)}</time></div>`).join('') || '<p class="sub">No notes yet</p>'}
             <textarea id="note-body" rows="3" placeholder="Staff-only note"></textarea>
-            <button class="btn secondary" data-act="note">Add note</button>
+            <div class="btn-row"><button class="btn secondary" data-act="note">Add note</button></div>
           </div>
         </div>
       </div>
@@ -590,38 +854,59 @@
     const userIds = (data || []).map((l) => l.user_id).filter(Boolean);
     const { data: profiles } = userIds.length ? await sb.from('profiles').select('id, email').in('id', userIds) : { data: [] };
     const pBy = Object.fromEntries((profiles || []).map((p) => [p.id, p]));
-    return layout(`<h1>Locals</h1>
+    return layout(`${pageHeader('Locals', 'Approved and pending Local creators.')}
       <div class="table-wrap"><table><thead><tr><th>Local ID</th><th>Name</th><th>Email</th><th>Status</th><th>Approved</th><th>Country</th><th>Languages</th><th>Completed</th><th>Rating</th><th>Created</th></tr></thead>
-      <tbody>${(data || []).map((l) => `<tr data-href="/ops/locals/${l.id}"><td>${esc(l.id.slice(0,8))}</td><td>${esc(l.display_name)}</td><td>${esc(pBy[l.user_id]?.email || '—')}</td><td>${esc(l.status)}</td><td>${esc(l.verification_status)}</td><td>${esc(l.country_id)}</td><td>${esc((l.languages||[]).join(', '))}</td><td>${esc(l.completed_trips)}</td><td>${esc(l.rating ?? 'N/A')}</td><td>${fmt(l.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
+      <tbody>${(data || []).map((l) => `<tr data-href="/ops/locals/${l.id}"><td class="mono">${esc(l.id.slice(0,8))}</td><td>${esc(l.display_name)}</td><td>${esc(pBy[l.user_id]?.email || '—')}</td><td>${pill(l.status)}</td><td>${esc(l.verification_status)}</td><td>${esc(l.country_id)}</td><td>${esc((l.languages||[]).join(', '))}</td><td>${esc(l.completed_trips)}</td><td>${esc(l.rating ?? '—')}</td><td>${fmt(l.created_at)}</td></tr>`).join('') || '<tr><td colspan="10">No Locals yet.</td></tr>'}</tbody></table></div>`);
   }
 
   async function localDetail(id) {
     const { data: l } = await sb.from('mapica_locals').select('*').eq('id', id).maybeSingle();
     const { data: assigns } = await sb.from('local_assignments').select('id, trip_id, status, assignment_type, created_at').eq('local_id', id).order('created_at', { ascending: false }).limit(50);
-    return layout(`<h1>${esc(l?.display_name || 'Local')}</h1>
-      <p>${pill(l?.status)} · verification ${esc(l?.verification_status)} · ${esc(l?.country_id)}</p>
+    return layout(`${pageHeader(l?.display_name || 'Local', `${l?.status || ''} · verification ${l?.verification_status || ''} · ${l?.country_id || ''}`)}
+      <p class="sub" style="margin-top:-12px;margin-bottom:18px">${pill(l?.status)}</p>
       <div class="section card"><h2>Profile</h2>
-        <p>Languages ${(l?.languages || []).join(', ') || 'N/A'}<br>About ${esc(l?.about || 'N/A')}<br>Completed ${esc(l?.completed_trips)} · rating ${esc(l?.rating ?? 'N/A')}</p>
+        <p>Languages ${(l?.languages || []).join(', ') || '—'}<br>About ${esc(l?.about || '—')}<br>Completed ${esc(l?.completed_trips)} · rating ${esc(l?.rating ?? '—')}</p>
         ${staff.role === 'ops_manager' || staff.role === 'admin' ? `
-          <button class="btn danger" data-act-local="deactivate">Deactivate Local</button>
-          <button class="btn secondary" data-act-local="reactivate">Reactivate</button>
+          <div class="btn-row">
+            <button class="btn danger" data-act-local="deactivate">Deactivate Local</button>
+            <button class="btn secondary" data-act-local="reactivate">Reactivate</button>
+          </div>
           <p class="err" id="local-act-err"></p>
         ` : ''}
       </div>
       <div class="section card"><h2>Assignment history</h2>
       <table><thead><tr><th>Trip</th><th>Status</th><th>Type</th><th>When</th></tr></thead>
-      <tbody>${(assigns || []).map((a) => `<tr data-href="/ops/personal-trips/${a.trip_id}"><td>${esc(a.trip_id.slice(0,8))}</td><td>${esc(a.status)}</td><td>${esc(a.assignment_type)}</td><td>${fmt(a.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
+      <tbody>${(assigns || []).map((a) => `<tr data-href="/ops/personal-trips/${a.trip_id}"><td class="mono">${esc(a.trip_id.slice(0,8))}</td><td>${esc(a.status)}</td><td>${esc(a.assignment_type)}</td><td>${fmt(a.created_at)}</td></tr>`).join('') || '<tr><td colspan="4">No assignments yet.</td></tr>'}</tbody></table></div>`);
   }
 
   async function appsView() {
     const notice = flash;
     flash = '';
-    const { data } = await sb.from('local_applications').select('id, user_id, status, verification_status, created_at').order('created_at', { ascending: false }).limit(100);
-    return layout(`<h1>Local applications</h1>
-      <p class="sub">Review, request more info, approve, or decline. Every action is audited.</p>
+    const { data } = await sb.from('local_applications').select('id, user_id, status, verification_status, created_at, payload').order('created_at', { ascending: false }).limit(100);
+    const userIds = (data || []).map((a) => a.user_id).filter(Boolean);
+    const { data: profiles } = userIds.length
+      ? await sb.from('profiles').select('id, display_name, email').in('id', userIds)
+      : { data: [] };
+    const pBy = Object.fromEntries((profiles || []).map((p) => [p.id, p]));
+    return layout(`${pageHeader('Applications', 'Review, request more info, approve, or decline. Every action is audited.')}
       ${notice ? `<div class="notice" role="status">${esc(notice)}</div>` : ''}
-      <div class="table-wrap"><table><thead><tr><th>ID</th><th>User</th><th>Status</th><th>Verification</th><th>Created</th></tr></thead>
-      <tbody>${(data || []).map((a) => `<tr data-href="/ops/local-applications/${a.id}"><td>${esc(a.id.slice(0,8))}</td><td>${esc(a.user_id.slice(0,8))}</td><td>${esc(a.status)}</td><td>${esc(a.verification_status)}</td><td>${fmt(a.created_at)}</td></tr>`).join('')}</tbody></table></div>`);
+      <div class="table-wrap"><table><thead><tr>
+        <th>Applicant</th><th>Destination / region</th><th>Languages</th><th>Applied at</th><th>Status</th>
+      </tr></thead>
+      <tbody>${(data || []).map((a) => {
+        const p = pBy[a.user_id] || {};
+        const payload = a.payload || {};
+        const dest = payload.homeCityName || payload.homeCountryName || payload.region || payload.country || '—';
+        const langs = Array.isArray(payload.languages) ? payload.languages.join(', ')
+          : (payload.languages || payload.spokenLanguages || '—');
+        return `<tr data-href="/ops/local-applications/${a.id}">
+          <td>${esc(p.display_name || 'Applicant')}<div class="attn-sub">${esc(p.email || a.user_id.slice(0, 8))}</div></td>
+          <td>${esc(dest)}</td>
+          <td>${esc(typeof langs === 'string' ? langs : '—')}</td>
+          <td>${fmt(a.created_at)}</td>
+          <td>${pill(a.status)}</td>
+        </tr>`;
+      }).join('') || '<tr><td colspan="5">No applications yet.</td></tr>'}</tbody></table></div>`);
   }
 
   async function appDetail(id) {
@@ -631,13 +916,16 @@
     const payload = JSON.stringify(a.payload || {}, null, 2);
     const notice = flash;
     flash = '';
-    return layout(`<h1>Application ${esc(id.slice(0, 8))}</h1>
-      <p>${pill(a.status)} · ${esc(a.verification_status)} · ${esc(profile?.display_name || '')} · ${esc(profile?.email || '')}</p>
+    const p = a.payload || {};
+    const dest = p.homeCityName || p.homeCountryName || p.region || '—';
+    const langs = Array.isArray(p.languages) ? p.languages.join(', ') : (p.languages || '—');
+    return layout(`${pageHeader(`Application ${id.slice(0, 8)}`, `${profile?.display_name || 'Applicant'} · ${profile?.email || ''}`)}
+      <p class="sub" style="margin-top:-12px;margin-bottom:18px">${pill(a.status)} · ${esc(a.verification_status)} · ${esc(dest)} · ${esc(langs)}</p>
       ${notice ? `<div class="notice" role="status">${esc(notice)}</div>` : ''}
-      <div class="section card"><h2>Payload</h2><pre style="white-space:pre-wrap;font-size:12px">${esc(payload)}</pre></div>
+      <div class="section card"><h2>Payload</h2><pre class="payload">${esc(payload)}</pre></div>
       <div class="section card"><h2>Review</h2>
         <textarea id="app-note" rows="3" placeholder="Note for decline / more info">${esc(a.staff_request_note || '')}</textarea>
-        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <div class="btn-row">
           <button class="btn" data-app="approve">Approve Local</button>
           <button class="btn secondary" data-app="request_info">Request more info</button>
           <button class="btn danger" data-app="decline">Decline</button>
@@ -648,42 +936,54 @@
 
   async function alertsView() {
     const { data } = await sb.from('ops_alerts').select('*').order('created_at', { ascending: false }).limit(100);
-    return layout(`<h1>Alerts</h1>
-      <div class="table-wrap"><table><thead><tr><th>Type</th><th>Severity</th><th>Status</th><th>Trip</th><th>Created</th><th></th></tr></thead>
-      <tbody>${(data || []).map((a) => `<tr>
-        <td>${esc(a.alert_type)}</td><td>${esc(a.severity)}</td><td>${pill(a.status)}</td>
+    const rows = data || [];
+    return layout(`${pageHeader('Alerts', 'Operational alerts requiring acknowledgment or follow-up.')}
+      <div class="table-wrap"><table><thead><tr><th>Severity</th><th>Event</th><th>Status</th><th>Trip</th><th>Age</th><th>Actions</th></tr></thead>
+      <tbody>${rows.map((a) => `<tr>
+        <td>${priorityBadge(a.severity === 'critical' ? 'urgent' : a.severity)}</td>
+        <td>${esc(humanReason(a.alert_type))}</td>
+        <td>${pill(a.status)}</td>
         <td>${a.trip_id ? `<a href="/ops/personal-trips/${a.trip_id}">${esc(a.trip_id.slice(0,8))}</a>` : '—'}</td>
-        <td>${fmt(a.created_at)}</td>
-        <td>${a.status === 'open' ? `<button class="btn secondary" data-ack="${a.id}">Ack</button>` : ''}</td>
-      </tr>`).join('')}</tbody></table></div>`);
+        <td>${esc(relTime(a.created_at))}</td>
+        <td>${a.status === 'open' ? `<button class="btn secondary" data-ack="${a.id}">Acknowledge</button>` : '—'}</td>
+      </tr>`).join('') || `<tr><td colspan="6">${'No open alerts.'}</td></tr>`}</tbody></table></div>`);
   }
 
   async function auditView() {
     const { data } = await sb.from('ops_audit_log').select('*').order('occurred_at', { ascending: false }).limit(200);
-    return layout(`<h1>Audit log</h1>
-      <p class="sub">Append-only. Staff cannot update or delete these rows.</p>
-      <div class="table-wrap"><table><thead><tr><th>Timestamp</th><th>Actor</th><th>Role</th><th>Action</th><th>Resource</th><th>Trip</th><th>Reason</th></tr></thead>
+    return layout(`${pageHeader('Audit', 'Append-only event log. Staff cannot update or delete these rows.')}
+      <div class="table-wrap"><table><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Resource</th><th>Reason</th></tr></thead>
       <tbody>${(data || []).map((a) => `<tr>
-        <td>${fmt(a.occurred_at)}</td><td>${esc((a.actor_user_id || '').slice(0,8))}</td><td>${esc(a.actor_role)}</td>
-        <td>${esc(a.action)}</td><td>${esc(a.resource_type)} ${esc(a.resource_id || '')}</td>
-        <td>${a.trip_id ? esc(a.trip_id.slice(0,8)) : '—'}</td><td>${esc(a.reason || '')}</td>
-      </tr>`).join('')}</tbody></table></div>`);
+        <td>${fmt(a.occurred_at)}</td>
+        <td><span class="mono">${esc((a.actor_user_id || '').slice(0,8) || '—')}</span> · ${esc(a.actor_role || '')}</td>
+        <td>${esc(activityTitle(a.action))}</td>
+        <td>${esc(a.resource_type)}${a.resource_id ? ` <span class="mono">${esc(String(a.resource_id).slice(0, 8))}</span>` : ''}${a.trip_id ? ` · trip <span class="mono">${esc(a.trip_id.slice(0,8))}</span>` : ''}</td>
+        <td>${esc(a.reason || '—')}</td>
+      </tr>`).join('') || '<tr><td colspan="5">No audit events yet.</td></tr>'}</tbody></table></div>`);
   }
 
   async function staffView() {
-    if (staff.role !== 'admin') return layout('<h1>Admin only</h1>');
+    if (staff.role !== 'admin') return layout(`${pageHeader('Staff', 'Admin only')}<p class="sub">You need the admin role to manage staff.</p>`);
     const { data } = await sb.from('staff_users').select('*').order('created_at');
-    return layout(`<h1>Staff</h1>
-      <div class="card">
+    return layout(`${pageHeader('Staff', 'Authorized Ops operators. Access is gated by staff_users.')}
+      <div class="card" style="margin-bottom:16px">
         <label>Authorize existing account (user uuid)</label>
-        <input id="staff-id" class="field" placeholder="user uuid" />
-        <select id="staff-role" class="field"><option>ops_agent</option><option>ops_manager</option><option>admin</option></select>
-        <button class="btn" id="staff-add">Save role</button>
+        <div class="filters" style="margin:8px 0 0">
+          <input id="staff-id" class="field" placeholder="user uuid" style="min-width:280px" />
+          <select id="staff-role" class="field"><option>ops_agent</option><option>ops_manager</option><option>admin</option></select>
+          <button class="btn" id="staff-add">Save role</button>
+        </div>
         <p class="err" id="staff-err"></p>
       </div>
       <div class="table-wrap"><table><thead><tr><th>User</th><th>Role</th><th>Active</th><th>Last login</th><th>Created</th></tr></thead>
-      <tbody>${(data || []).map((s) => `<tr><td>${esc(s.user_id)}</td><td>${esc(s.role)}</td><td>${s.active}</td><td>${fmt(s.last_login_at)}</td><td>${fmt(s.created_at)}</td></tr>`).join('')}</tbody></table></div>
-      <p class="sub">MFA: enable TOTP in Supabase Dashboard → Authentication → Multi-Factor. Ops does not treat MFA as active until that is configured.</p>`);
+      <tbody>${(data || []).map((s) => `<tr>
+        <td class="mono">${esc(s.user_id)}</td>
+        <td>${esc(s.role)}</td>
+        <td>${s.active ? '<span class="ops-badge st-ok">Active</span>' : '<span class="ops-badge st-mute">Inactive</span>'}</td>
+        <td>${fmt(s.last_login_at)}</td>
+        <td>${fmt(s.created_at)}</td>
+      </tr>`).join('')}</tbody></table></div>
+      <p class="sub" style="margin-top:14px">MFA: enable TOTP in Supabase Dashboard → Authentication → Multi-Factor. Ops does not treat MFA as active until that is configured.</p>`);
   }
 
   async function render() {
@@ -719,6 +1019,13 @@
         bindOnce();
         return;
       }
+      try {
+        const { count } = await sb.from('ops_alerts').select('id', { count: 'exact', head: true }).eq('status', 'open');
+        openAlerts = count || 0;
+      } catch {
+        openAlerts = 0;
+      }
+      if (seq !== renderSeq) return;
       let html = '';
       for (const [re, name] of routes) {
         const m = p.match(re);
@@ -805,6 +1112,13 @@
     if (bound) return;
     bound = true;
     document.addEventListener('click', () => { if (staff) bumpIdle(); });
+    app.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = e.target.closest('.attn-row[data-href]');
+      if (!row || !app.contains(row)) return;
+      e.preventDefault();
+      go(row.getAttribute('data-href'));
+    });
     app.addEventListener('click', async (e) => {
       const a = e.target.closest('a[href^="/ops"]');
       if (a && app.contains(a) && !e.defaultPrevented) {
@@ -815,6 +1129,22 @@
       const tr = e.target.closest('tr[data-href]');
       if (tr && !e.target.closest('a, button, input, select, textarea')) {
         go(tr.getAttribute('data-href'));
+        return;
+      }
+      const attn = e.target.closest('.attn-row[data-href]');
+      if (attn) {
+        go(attn.getAttribute('data-href'));
+        return;
+      }
+      if (e.target.closest('#ops-export')) {
+        if (!lastExportPayload) return;
+        const blob = new Blob([JSON.stringify(lastExportPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mapica-ops-overview-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
         return;
       }
       const localPick = e.target.closest('[data-local]');
