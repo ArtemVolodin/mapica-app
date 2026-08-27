@@ -173,7 +173,12 @@
     }
     staff = data;
     bumpIdle();
-    await sb.rpc('ops_touch_login').catch(() => {});
+    // UMD supabase-js rpc() is thenable but has no .catch (Safari throws).
+    try {
+      await sb.rpc('ops_touch_login');
+    } catch {
+      /* last-login stamp is best-effort */
+    }
   }
 
   function bumpIdle() {
