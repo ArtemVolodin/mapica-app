@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /ops
+Disallow: /ops/
+Disallow: /staff
+Disallow: /staff/
+
+Sitemap: https://mapica.app/sitemap.xml
