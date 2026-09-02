@@ -236,6 +236,10 @@
     return `${h}h ${m}m`;
   }
 
+  function canAccessFinance(role) {
+    return role === 'ops_manager' || role === 'admin';
+  }
+
   function layout(body) {
     const role = staff?.role || '';
     const email = session?.user?.email || '';
@@ -257,7 +261,7 @@
         ${nav('/ops/locals', 'Locals', ICO.locals)}
         ${nav('/ops/local-applications', 'Applications', ICO.apps)}
         ${nav('/ops/alerts', 'Alerts', ICO.alerts, openAlerts > 0 ? openAlerts : null)}
-        ${nav('/ops/finance', 'Finance', ICO.finance)}
+        ${canAccessFinance(role) ? nav('/ops/finance', 'Finance', ICO.finance) : ''}
         ${nav('/ops/audit', 'Audit', ICO.audit)}
         ${role === 'admin' ? nav('/ops/staff', 'Staff', ICO.staff) : ''}
         <div class="grow"></div>
@@ -958,6 +962,11 @@
   }
 
   async function financeView() {
+    const role = staff?.role || '';
+    if (!canAccessFinance(role)) {
+      return layout(`${pageHeader('Finance', 'Access restricted')}
+        <p class="sub">Finance requires <strong>ops_manager</strong> or <strong>admin</strong>. Contact an admin if you need access.</p>`);
+    }
     const q = new URLSearchParams(location.search);
     const days = Math.max(1, Math.min(365, Number(q.get('days')) || 30));
     const [{ data: summary, error: sumErr }, { data: sales, error: salesErr }] = await Promise.all([
@@ -966,7 +975,6 @@
     ]);
     const s = (summary && summary[0]) || {};
     const rows = sales || [];
-    const role = staff?.role || '';
     const canRelease = role === 'ops_manager' || role === 'admin';
 
     const periodLinks = [1, 7, 30, 90].map((d) => {
