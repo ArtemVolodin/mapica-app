@@ -1,220 +1,69 @@
 {
   "redirects": [
-    {
-      "source": "/terms.html",
-      "destination": "/terms",
-      "permanent": true
-    },
-    {
-      "source": "/fr/terms.html",
-      "destination": "/fr/terms",
-      "permanent": true
-    },
-    {
-      "source": "/ru/terms.html",
-      "destination": "/ru/terms",
-      "permanent": true
-    },
-    {
-      "source": "/privacy.html",
-      "destination": "/privacy",
-      "permanent": true
-    },
-    {
-      "source": "/fr/privacy.html",
-      "destination": "/fr/privacy",
-      "permanent": true
-    },
-    {
-      "source": "/ru/privacy.html",
-      "destination": "/ru/privacy",
-      "permanent": true
-    },
-    {
-      "source": "/refunds.html",
-      "destination": "/refunds",
-      "permanent": true
-    },
-    {
-      "source": "/fr/refunds.html",
-      "destination": "/fr/refunds",
-      "permanent": true
-    },
-    {
-      "source": "/ru/refunds.html",
-      "destination": "/ru/refunds",
-      "permanent": true
-    },
-    {
-      "source": "/contact.html",
-      "destination": "/contact",
-      "permanent": true
-    }
+    { "source": "/terms.html", "destination": "/terms", "permanent": true },
+    { "source": "/fr/terms.html", "destination": "/fr/terms", "permanent": true },
+    { "source": "/ru/terms.html", "destination": "/ru/terms", "permanent": true },
+    { "source": "/privacy.html", "destination": "/privacy", "permanent": true },
+    { "source": "/fr/privacy.html", "destination": "/fr/privacy", "permanent": true },
+    { "source": "/ru/privacy.html", "destination": "/ru/privacy", "permanent": true },
+    { "source": "/refunds.html", "destination": "/refunds", "permanent": true },
+    { "source": "/fr/refunds.html", "destination": "/fr/refunds", "permanent": true },
+    { "source": "/ru/refunds.html", "destination": "/ru/refunds", "permanent": true },
+    { "source": "/contact.html", "destination": "/contact", "permanent": true }
   ],
   "rewrites": [
-    {
-      "source": "/staff/local",
-      "destination": "/api/staff-local"
-    },
-    {
-      "source": "/ops",
-      "destination": "/ops/index.html"
-    },
-    {
-      "source": "/ops/",
-      "destination": "/ops/index.html"
-    },
-    {
-      "source": "/ops/:path*",
-      "destination": "/ops/index.html"
-    },
-    {
-      "source": "/route/:slug",
-      "destination": "/api/route?slug=:slug"
-    },
-    {
-      "source": "/@:handle/:routeSlug",
-      "destination": "/api/route?slug=:routeSlug"
-    },
-    {
-      "source": "/local",
-      "destination": "/creators.html"
-    },
-    {
-      "source": "/privacy",
-      "destination": "/privacy.html"
-    },
-    {
-      "source": "/terms",
-      "destination": "/terms.html"
-    },
-    {
-      "source": "/contact",
-      "destination": "/contact.html"
-    },
-    {
-      "source": "/refunds",
-      "destination": "/refunds.html"
-    },
-    {
-      "source": "/fr",
-      "destination": "/fr/index.html"
-    },
-    {
-      "source": "/fr/",
-      "destination": "/fr/index.html"
-    },
-    {
-      "source": "/fr/local",
-      "destination": "/fr/creators.html"
-    },
-    {
-      "source": "/fr/privacy",
-      "destination": "/fr/privacy.html"
-    },
-    {
-      "source": "/fr/terms",
-      "destination": "/fr/terms.html"
-    },
-    {
-      "source": "/fr/refunds",
-      "destination": "/fr/refunds.html"
-    },
-    {
-      "source": "/fr/contact",
-      "destination": "/fr/contact.html"
-    },
-    {
-      "source": "/ru/privacy",
-      "destination": "/ru/privacy.html"
-    },
-    {
-      "source": "/ru/terms",
-      "destination": "/ru/terms.html"
-    },
-    {
-      "source": "/ru/refunds",
-      "destination": "/ru/refunds.html"
-    },
-    {
-      "source": "/fr/route/:slug",
-      "destination": "/api/route?slug=:slug&lang=fr"
-    },
-    {
-      "source": "/fr/@:handle/:routeSlug",
-      "destination": "/api/route?slug=:routeSlug&lang=fr"
-    },
-    {
-      "source": "/fr/:slug",
-      "destination": "/api/storefront?slug=:slug&lang=fr"
-    },
-    {
-      "source": "/:slug",
-      "destination": "/api/storefront?slug=:slug"
-    }
+    { "source": "/staff/local", "destination": "/api/staff-local" },
+    { "source": "/ops", "destination": "/ops/index.html" },
+    { "source": "/ops/", "destination": "/ops/index.html" },
+    { "source": "/ops/:path*", "destination": "/ops/index.html" },
+    { "source": "/route/:slug", "destination": "/api/route?slug=:slug" },
+    { "source": "/@:handle/:routeSlug", "destination": "/api/route?slug=:routeSlug" },
+    { "source": "/local", "destination": "/creators.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/refunds", "destination": "/refunds.html" },
+    { "source": "/fr", "destination": "/fr/index.html" },
+    { "source": "/fr/", "destination": "/fr/index.html" },
+    { "source": "/fr/local", "destination": "/fr/creators.html" },
+    { "source": "/fr/privacy", "destination": "/fr/privacy.html" },
+    { "source": "/fr/terms", "destination": "/fr/terms.html" },
+    { "source": "/fr/refunds", "destination": "/fr/refunds.html" },
+    { "source": "/fr/contact", "destination": "/fr/contact.html" },
+    { "source": "/ru/privacy", "destination": "/ru/privacy.html" },
+    { "source": "/ru/terms", "destination": "/ru/terms.html" },
+    { "source": "/ru/refunds", "destination": "/ru/refunds.html" },
+    { "source": "/fr/route/:slug", "destination": "/api/route?slug=:slug&lang=fr" },
+    { "source": "/fr/@:handle/:routeSlug", "destination": "/api/route?slug=:routeSlug&lang=fr" },
+    { "source": "/fr/:slug", "destination": "/api/storefront?slug=:slug&lang=fr" },
+    { "source": "/:slug", "destination": "/api/storefront?slug=:slug" }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=63072000; includeSubDomains"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
-        }
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" }
       ]
     },
     {
       "source": "/ops",
       "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow, noarchive"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "no-store"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
-        }
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; object-src 'none'" }
       ]
     },
     {
       "source": "/ops/(.*)",
       "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow, noarchive"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "no-store"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
-        }
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; object-src 'none'" }
       ]
     },
     {
@@ -274,19 +123,13 @@
     {
       "source": "/.well-known/apple-app-site-association",
       "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/json"
-        }
+        { "key": "Content-Type", "value": "application/json" }
       ]
     },
     {
       "source": "/.well-known/assetlinks.json",
       "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/json"
-        }
+        { "key": "Content-Type", "value": "application/json" }
       ]
     }
   ]

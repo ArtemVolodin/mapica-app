@@ -9,7 +9,6 @@
           "/l/*",
           "/local/apply",
           "/local/apply/*",
-          "NOT /staff/*",
           "NOT /local",
           "NOT /",
           "NOT /privacy",

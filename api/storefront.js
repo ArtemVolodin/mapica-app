@@ -250,7 +250,9 @@ var RESERVED = /* @__PURE__ */ new Set([
   "null",
   "undefined",
   "fr",
-  "refunds"
+  "refunds",
+  "ops",
+  "staff"
 ]);
 var EXPERTISE_LABELS_EN = {
   hiddenPlaces: "Hidden places",

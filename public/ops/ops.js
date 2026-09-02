@@ -24,6 +24,7 @@
     logout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
     calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
     download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    finance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="6.01" y2="15"/><line x1="10" y1="15" x2="14" y2="15"/></svg>',
     spark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4"/><path d="M12 17v4"/><path d="M3 12h4"/><path d="M17 12h4"/><path d="m5.6 5.6 2.8 2.8"/><path d="m15.6 15.6 2.8 2.8"/><path d="m18.4 5.6-2.8 2.8"/><path d="m8.4 15.6-2.8 2.8"/></svg>',
   };
 
@@ -35,6 +36,7 @@
     [/^\/ops\/locals\/([^/]+)\/?$/, 'local'],
     [/^\/ops\/local-applications\/?$/, 'apps'],
     [/^\/ops\/local-applications\/([^/]+)\/?$/, 'app'],
+    [/^\/ops\/finance\/?$/, 'finance'],
     [/^\/ops\/alerts\/?$/, 'alerts'],
     [/^\/ops\/audit\/?$/, 'audit'],
     [/^\/ops\/staff\/?$/, 'staff'],
@@ -59,6 +61,7 @@
     if (h === '/ops') return p === '/ops';
     if (h === '/ops/locals') return p === '/ops/locals' || p.startsWith('/ops/locals/');
     if (h === '/ops/local-applications') return p.includes('/local-applications');
+    if (h === '/ops/finance') return p === '/ops/finance';
     return p === h || p.startsWith(`${h}/`);
   }
 
@@ -205,6 +208,25 @@
     return d.toLocaleString();
   }
 
+  function moneyCents(cents, currency = 'EUR') {
+    const n = Number(cents) || 0;
+    try {
+      return new Intl.NumberFormat('en', {
+        style: 'currency',
+        currency: String(currency || 'EUR').toUpperCase(),
+        minimumFractionDigits: 2,
+      }).format(n / 100);
+    } catch {
+      return `€${(n / 100).toFixed(2)}`;
+    }
+  }
+
+  function productTypeLabel(type) {
+    if (type === 'ready_route') return 'Ready Route';
+    if (type === 'personal_trip') return 'Custom Trip';
+    return type || '—';
+  }
+
   function remaining(due) {
     if (!due) return 'N/A';
     const ms = new Date(due).getTime() - Date.now();
@@ -235,6 +257,7 @@
         ${nav('/ops/locals', 'Locals', ICO.locals)}
         ${nav('/ops/local-applications', 'Applications', ICO.apps)}
         ${nav('/ops/alerts', 'Alerts', ICO.alerts, openAlerts > 0 ? openAlerts : null)}
+        ${nav('/ops/finance', 'Finance', ICO.finance)}
         ${nav('/ops/audit', 'Audit', ICO.audit)}
         ${role === 'admin' ? nav('/ops/staff', 'Staff', ICO.staff) : ''}
         <div class="grow"></div>
@@ -934,6 +957,130 @@
       </div>`);
   }
 
+  async function financeView() {
+    const q = new URLSearchParams(location.search);
+    const days = Math.max(1, Math.min(365, Number(q.get('days')) || 30));
+    const [{ data: summary, error: sumErr }, { data: sales, error: salesErr }] = await Promise.all([
+      sb.rpc('ops_financial_summary', { p_days: days }),
+      sb.rpc('ops_financial_sales', { p_limit: 200 }),
+    ]);
+    const s = (summary && summary[0]) || {};
+    const rows = sales || [];
+    const role = staff?.role || '';
+    const canRelease = role === 'ops_manager' || role === 'admin';
+
+    const periodLinks = [1, 7, 30, 90].map((d) => {
+      const active = d === days ? ' active' : '';
+      const label = d === 1 ? 'Today' : `${d}d`;
+      return `<a class="ops-chip${active}" href="/ops/finance?days=${d}">${label}</a>`;
+    }).join('');
+
+    const tableRows = rows.map((r) => {
+      const type = productTypeLabel(r.product_type);
+      const refund = Number(r.refund_amount_cents) || 0;
+      return `<tr data-finance-order="${r.order_id}" class="finance-row">
+        <td>${esc(fmt(r.paid_at || r.created_at))}</td>
+        <td>
+          <div class="attn-title">${esc(r.product_title || r.order_number || '—')}</div>
+          <div class="attn-sub mono">${esc(r.order_number || '')}</div>
+        </td>
+        <td>${esc(type)}</td>
+        <td>${moneyCents(r.gross_customer_amount_cents, r.currency)}</td>
+        <td>${moneyCents(r.payment_fee_cents + r.store_fee_cents + r.tax_amount_cents, r.currency)}</td>
+        <td>${moneyCents(r.net_receipts_cents, r.currency)}</td>
+        <td>${moneyCents(r.creator_earnings_cents, r.currency)}</td>
+        <td>${moneyCents(r.mapica_revenue_cents, r.currency)}</td>
+        <td>${refund > 0 ? moneyCents(refund, r.currency) : '—'}</td>
+        <td>${pill(r.creator_payable_status || r.payment_status)}</td>
+      </tr>`;
+    }).join('');
+
+    return layout(`${pageHeader('Finance', sumErr ? sumErr.message : 'Private sales ledger — Gross → Net Receipts → Local / Mapica split', `
+        <div class="ops-chip-row">${periodLinks}</div>
+      `)}
+      ${salesErr ? `<p class="err">${esc(salesErr.message)}</p>` : ''}
+      <div class="kpi-grid" aria-label="Finance KPIs">
+        ${kpiCard({ value: moneyCents(s.gross_sales_cents), label: 'Gross sales', tone: 'teal', icon: ICO.finance })}
+        ${kpiCard({ value: moneyCents(s.net_receipts_cents), label: 'Net receipts', tone: 'blue', icon: ICO.finance })}
+        ${kpiCard({ value: moneyCents(s.mapica_revenue_cents), label: 'Mapica revenue', tone: 'indigo', icon: ICO.finance })}
+        ${kpiCard({ value: moneyCents(s.creator_earnings_cents), label: 'Creator earnings', tone: 'lime', icon: ICO.locals })}
+        ${kpiCard({ value: moneyCents(s.outstanding_creator_payables_cents), label: 'Outstanding payables', tone: 'orange', icon: ICO.finance })}
+        ${kpiCard({ value: moneyCents(s.refunds_cents), label: 'Refunds', tone: 'red', icon: ICO.finance })}
+      </div>
+      <div class="cards" style="margin-top:-6px">
+        ${card(s.orders_count, 'Paid orders')}
+        ${card(moneyCents(s.ready_route_gmv_cents), 'Ready Route GMV')}
+        ${card(moneyCents(s.custom_trip_gmv_cents), 'Custom Trip GMV')}
+        ${card(moneyCents(s.payment_fees_cents), 'Payment fees')}
+        ${card(moneyCents(s.store_fees_cents), 'Store fees')}
+        ${card(moneyCents(s.paid_to_creators_cents), 'Paid to creators')}
+      </div>
+      <section class="section card" style="margin-top:18px">
+        <div class="ops-section-label">Sales</div>
+        <div class="table-wrap finance-table-wrap"><table>
+          <thead><tr>
+            <th>Date</th><th>Sale</th><th>Type</th><th>Gross</th><th>Fees+Tax</th>
+            <th>Net</th><th>Local</th><th>Mapica</th><th>Refund</th><th>Status</th>
+          </tr></thead>
+          <tbody>${tableRows || '<tr><td colspan="10">No paid sales yet.</td></tr>'}</tbody>
+        </table></div>
+        <p class="sub" style="margin-top:12px">Click a row for full reconciliation.${canRelease ? ' Managers can release pending payables from the detail drawer.' : ''}</p>
+      </section>
+      <div id="finance-modal-root"></div>`);
+  }
+
+  async function openFinanceDetail(orderId) {
+    const root = document.getElementById('finance-modal-root');
+    if (!root) return;
+    root.innerHTML = `<div class="modal finance-modal" id="finance-modal"><div class="box finance-box"><p class="sub">Loading…</p></div></div>`;
+    const { data, error } = await sb.rpc('ops_financial_sale_detail', { p_order_id: orderId });
+    if (error) {
+      root.innerHTML = `<div class="modal finance-modal" id="finance-modal"><div class="box finance-box"><p class="err">${esc(error.message)}</p><button type="button" class="btn secondary" id="finance-close">Close</button></div></div>`;
+      return;
+    }
+    const order = data?.order || {};
+    const sale = data?.sale_ledger || {};
+    const payables = data?.creator_payables || [];
+    const adjustments = data?.adjustments || [];
+    const creator = data?.creator_profile || {};
+    const role = staff?.role || '';
+    const canRelease = (role === 'ops_manager' || role === 'admin')
+      && payables.some((p) => p.entry_type === 'creator_payable' && p.status === 'pending');
+
+    const rows = [
+      ['Order', order.order_number],
+      ['Product', `${productTypeLabel(order.product_type)} · ${order.product_title || ''}`],
+      ['Creator', creator.display_name || order.creator_id || '—'],
+      ['Gross', moneyCents(order.gross_amount_minor, order.currency)],
+      ['VAT', moneyCents(order.vat_amount_minor, order.currency)],
+      ['Stripe fee', moneyCents(order.stripe_fee_minor, order.currency)],
+      ['Store fee (expected)', moneyCents(order.apple_commission_expected_minor, order.currency)],
+      ['Net receipts', moneyCents(order.net_receipts_minor, order.currency)],
+      ['Creator share', moneyCents(sale.creator_earnings_cents ?? order.creator_share_minor, order.currency)],
+      ['Mapica share', moneyCents(sale.mapica_amount_cents ?? order.mapica_share_minor, order.currency)],
+      ['Refund', moneyCents(order.refund_amount_minor, order.currency)],
+      ['Payment status', order.status],
+      ['Settlement policy', sale.settlement_policy_version || '2026.08.1'],
+    ];
+
+    root.innerHTML = `<div class="modal finance-modal" id="finance-modal">
+      <div class="box finance-box">
+        <h3>Sale reconciliation</h3>
+        <p class="sub mono">${esc(String(orderId))}</p>
+        <div class="finance-kv">${rows.map(([k, v]) => `<div class="finance-kv-row"><span>${esc(k)}</span><strong>${esc(String(v ?? '—'))}</strong></div>`).join('')}</div>
+        ${payables.length ? `<div class="ops-section-label" style="margin-top:16px">Creator payables</div>
+          <pre class="payload">${esc(JSON.stringify(payables, null, 2))}</pre>` : ''}
+        ${adjustments.length ? `<div class="ops-section-label" style="margin-top:16px">Adjustments</div>
+          <pre class="payload">${esc(JSON.stringify(adjustments, null, 2))}</pre>` : ''}
+        <div class="btn-row">
+          ${canRelease ? `<button type="button" class="btn" id="finance-release" data-order="${esc(orderId)}">Release payable</button>` : ''}
+          <button type="button" class="btn secondary" id="finance-close">Close</button>
+        </div>
+        <p class="err" id="finance-err"></p>
+      </div>
+    </div>`;
+  }
+
   async function alertsView() {
     const { data } = await sb.from('ops_alerts').select('*').order('created_at', { ascending: false }).limit(100);
     const rows = data || [];
@@ -1038,6 +1185,7 @@
         else if (name === 'apps') html = await appsView();
         else if (name === 'app') html = await appDetail(m[1]);
         else if (name === 'alerts') html = await alertsView();
+        else if (name === 'finance') html = await financeView();
         else if (name === 'audit') html = await auditView();
         else if (name === 'staff') html = await staffView();
         break;
@@ -1129,6 +1277,40 @@
       const tr = e.target.closest('tr[data-href]');
       if (tr && !e.target.closest('a, button, input, select, textarea')) {
         go(tr.getAttribute('data-href'));
+        return;
+      }
+      const financeRow = e.target.closest('tr[data-finance-order]');
+      if (financeRow) {
+        await openFinanceDetail(financeRow.getAttribute('data-finance-order'));
+        return;
+      }
+      if (e.target.closest('#finance-close') || e.target.closest('#finance-modal.finance-modal') === e.target) {
+        const root = document.getElementById('finance-modal-root');
+        if (root) root.innerHTML = '';
+        return;
+      }
+      if (e.target.closest('#finance-release')) {
+        const btn = e.target.closest('#finance-release');
+        const orderId = btn.getAttribute('data-order');
+        const reason = window.prompt('Release reason (optional)') || null;
+        const errBox = document.getElementById('finance-err');
+        btn.disabled = true;
+        try {
+          const { error } = await sb.rpc('ops_release_creator_payable', {
+            p_order_id: orderId,
+            p_reason: reason,
+          });
+          if (error && errBox) errBox.textContent = error.message;
+          else {
+            const root = document.getElementById('finance-modal-root');
+            if (root) root.innerHTML = '';
+            flash = 'Creator payable released.';
+            render();
+          }
+        } catch (err) {
+          if (errBox) errBox.textContent = err.message || String(err);
+          btn.disabled = false;
+        }
         return;
       }
       const attn = e.target.closest('.attn-row[data-href]');

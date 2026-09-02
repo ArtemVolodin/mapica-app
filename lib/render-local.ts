@@ -42,7 +42,7 @@ const RESERVED = new Set([
   'profile', 'auth', 'login', 'welcome', 'notifications', 'l', 'index',
   'assets', 'static', 'www', 'admin', 'support', 'about', 'blog', 'help',
   'favicon', 'robots', 'sitemap', 'mapica', 'null', 'undefined',
-  'fr', 'refunds',
+  'fr', 'refunds', 'ops', 'staff',
 ]);
 
 const EXPERTISE_LABELS_EN: Record<string, string> = {
